@@ -1,0 +1,139 @@
+name: iOS E2E Tests
+
+on:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    timeout-minutes: 45
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: "iPhone-15"
+            runtime: "com.apple.CoreSimulator.SimRuntime.iOS-17-0"
+          - device: "iPad-Pro-12-9-inch-6th-generation-8GB"
+            runtime: "com.apple.CoreSimulator.SimRuntime.iOS-17-2"
+          - device: "iPhone-SE-3rd-generation"
+            runtime: "com.apple.CoreSimulator.SimRuntime.iOS-17-4"
+          - device: "iPhone-16-Pro"
+            runtime: "com.apple.CoreSimulator.SimRuntime.iOS-18-1"
+          - device: "iPad-Pro-11-inch-M4-8GB"
+            runtime: "com.apple.CoreSimulator.SimRuntime.iOS-18-1"
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Log runner info
+        run: npx envinfo
+
+      - name: List available simulators
+        run: |
+          xcrun simctl list runtimes
+          xcrun simctl list devicetypes
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+      
+      - name: Install dependencies
+        run: |
+          npm install -g yarn
+          yarn install
+
+      - name: Run iOS Simulator
+        run: |
+          echo "Creating and booting simulator"
+          DEVICE_ID=$(xcrun simctl create "$XC_SIMULATOR_NAME" \
+            "com.apple.CoreSimulator.SimDeviceType.$XC_DEVICE_TYPE" \
+            "$XC_RUNTIME")
+          xcrun simctl boot "$DEVICE_ID"
+        env:
+          XC_SIMULATOR_NAME: "Test Device ${{ matrix.device }}"
+          XC_DEVICE_TYPE: ${{ matrix.device }}
+          XC_RUNTIME: ${{ matrix.runtime }}
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Build iOS App
+        run: |
+          yarn generate-test-data
+          yarn expo prebuild --platform ios
+          cd ios
+          pod install
+          xcodebuild -workspace pinpadclientmaplibre.xcworkspace \
+            -scheme pinpadclientmaplibre \
+            -sdk iphonesimulator \
+            -arch arm64 \
+            -configuration Debug \
+            -derivedDataPath build \
+            -quiet \
+            COMPILER_INDEX_STORE_ENABLE=NO
+
+      - name: Start Metro Bundler
+        run: |
+          yarn start &
+          echo "Waiting for Metro bundler to start..."
+          sleep 30
+
+      - name: Install .app
+        run: xcrun simctl install booted ios/build/Build/Products/Debug-iphonesimulator/pinpadclientmaplibre.app
+
+      - name: Run Maestro E2E tests
+        run: |
+          
+          max_attempts=4
+          attempt=1
+          
+          until maestro test .maestro/ || [ $attempt -ge $max_attempts ]; do
+            echo "Attempt $attempt failed. Retrying..."
+            attempt=$((attempt + 1))
+            
+            echo "Current simulator state:"
+            maestro hierarchy
+            
+            sleep 5
+          done
+          
+          if [ $attempt -ge $max_attempts ]; then
+            echo "All $max_attempts attempts failed"
+            exit 1
+          fi
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: 200000 
+          MAESTRO_THROTTLE_CPU: true
+
+      - name: Capture simulator screenshot on failure
+        if: failure()
+        run: |
+          maestro hierarchy
+          xcrun simctl io booted screenshot "failed-test-screenshot.png"
+
+      - name: Upload Maestro artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-artifacts-${{ matrix.device }}-ios${{ matrix.runtime }}
+          path: |
+            ~/Library/Logs/maestro/
+            ~/.maestro/tests/
+            ~/.maestro/screenshots/
+            failed-test-screenshot.png
