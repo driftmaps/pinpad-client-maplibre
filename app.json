@@ -35,7 +35,14 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      "./plugins/withIosDeploymentTarget",
+      [
+        "expo-asset",
+        {
+          "assets": ["./assets/test.drift"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
