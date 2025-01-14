@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Pin, PinCreateInput, PinAction } from '../types/pin';
+import { Pin, PinCreateInput, PinAction, Coordinates } from '../types/pin';
 
 const generateId = () => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -8,94 +8,91 @@ const generateId = () => {
 interface PinManagerState {
   pins: Pin[];
   actions: PinAction[];
+  pendingPin: boolean;
 }
 
 export function usePinManager() {
   const [state, setState] = useState<PinManagerState>({
     pins: [],
     actions: [],
+    pendingPin: false,
   });
 
   const dispatchPinAction = useCallback((action: PinAction) => {
     setState(current => {
-      const newState = { ...current };
-
       switch (action.type) {
-        case 'PIN_CREATE': {
-          const newPin = {
-            ...(action.payload as PinCreateInput),
-            id: generateId(),
-            timestamp: Date.now(),
+
+        case 'SET_PENDING_PIN': {
+          const coordinates = action.payload as Coordinates;
+          return {
+            pins: [...current.pins, {
+              id: 'pending-pin',
+              coordinates,
+              emoji: '📍',
+              message: '',
+              timestamp: action.timestamp,
+            }],
+            actions: [...current.actions, action],
+            pendingPin: true,
           };
-          const nonPlaceholderPins = current.pins.filter(pin => !pin.isPlaceholder);
+        }
+
+        case 'FINALIZE_PENDING_PIN': {
+          if (!current.pendingPin) return current;
+          let updatedPin = current.pins.find(pin => pin.id === 'pending-pin');
+          updatedPin = {
+            ...updatedPin,
+            ...(action.payload as Partial<Pin>),
+          } as Pin;
           return {
             ...current,
-            pins: [...nonPlaceholderPins, newPin],
+            pendingPin: false,
+            pins: [...current.pins.filter(pin => pin.id !== 'pending-pin'), updatedPin],
             actions: [...current.actions, action],
           };
         }
 
-        case 'SET_PLACEHOLDER': {
-          const coordinates = action.payload as Coordinates;
+        case 'CLEAR_PENDING_PIN': {
           return {
             ...current,
-            pins: [
-              ...current.pins.filter(pin => !pin.isPlaceholder),
-              {
-                id: 'placeholder',
-                coordinates,
-                emoji: '📍',
-                message: '',
-                isPlaceholder: true,
-                timestamp: action.timestamp,
-              }
-            ]
+            pendingPin: false,
+            pins: current.pins.filter(pin => pin.id !== 'pending-pin'),
+            actions: [...current.actions, action],
           };
         }
 
-        case 'PIN_UPDATE':
-          const { id, ...updates } = action.payload as Partial<Pin> & { id: string };
-          newState.pins = current.pins.map(pin =>
-            pin.id === id ? { ...pin, ...updates } : pin
-          );
-          break;
-
-        case 'PIN_DELETE':
-          newState.pins = current.pins.filter(
-            pin => pin.id !== action.payload
-          );
-          break;
-
-        case 'CLEAR_PLACEHOLDERS': {
+        case 'PIN_DELETE': {
           return {
             ...current,
-            pins: current.pins.filter(pin => !pin.isPlaceholder),
+            pins: current.pins.filter(pin => pin.id !== action.payload),
+            actions: [...current.actions, action],
           };
         }
 
-        default:
+        default: {
           console.warn(`Unhandled action type: ${action.type}`);
           return current;
+        }
       }
-
-      // Record the action in history
-      newState.actions = [...current.actions, action];
-      return newState;
     });
   }, []);
 
-  const createPin = useCallback((input: PinCreateInput) => {
+  const setPendingPin = useCallback((coordinates: Coordinates) => {
     dispatchPinAction({
-      type: 'PIN_CREATE',
-      payload: input,
+      type: 'SET_PENDING_PIN',
+      payload: coordinates,
       timestamp: Date.now(),
     });
   }, [dispatchPinAction]);
 
-  const updatePin = useCallback((id: string, updates: Partial<Omit<Pin, 'id'>>) => {
+  const finalizePendingPin = useCallback((pinData: Partial<Pin>) => {
     dispatchPinAction({
-      type: 'PIN_UPDATE',
-      payload: { id, ...updates },
+      type: 'FINALIZE_PENDING_PIN',
+      payload: {
+        id: generateId(),
+        ...pinData,
+        timestamp: Date.now(),
+      },
       timestamp: Date.now(),
     });
   }, [dispatchPinAction]);
@@ -108,21 +105,14 @@ export function usePinManager() {
     });
   }, [dispatchPinAction]);
 
-  const setPlaceholderPin = useCallback((coordinates: Coordinates) => {
+  const clearPendingPin = useCallback(() => {
     dispatchPinAction({
-      type: 'SET_PLACEHOLDER',
-      payload: coordinates,
-      timestamp: Date.now(),
-    });
-  }, [dispatchPinAction]);
-
-  const clearPlaceholderPins = useCallback(() => {
-    dispatchPinAction({
-      type: 'CLEAR_PLACEHOLDERS',
+      type: 'CLEAR_PENDING_PIN',
       payload: null,
       timestamp: Date.now(),
     });
   }, [dispatchPinAction]);
+
 
   const exportData = useCallback(() => {
     return {
@@ -135,11 +125,10 @@ export function usePinManager() {
   return {
     pins: state.pins,
     actions: state.actions,
-    createPin,
-    updatePin,
+    setPendingPin,
+    finalizePendingPin,
     deletePin,
+    clearPendingPin,
     exportData,
-    setPlaceholderPin,
-    clearPlaceholderPins,
   };
 }

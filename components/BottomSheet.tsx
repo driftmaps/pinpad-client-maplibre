@@ -21,7 +21,6 @@ export function BottomSheet({
     if (visible) {
       bottomSheetRef.current?.expand();
     } else {
-      // Safely handle closing
       try {
         bottomSheetRef.current?.close();
       } catch (error) {
@@ -30,7 +29,6 @@ export function BottomSheet({
     }
   }, [visible]);
 
-  // Handle cleanup
   useEffect(() => {
     return () => {
       try {

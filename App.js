@@ -1,4 +1,4 @@
-import React, { useEffect,useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { StyleSheet, View, ActivityIndicator, Text } from 'react-native';
 import MapLibreGL from '@maplibre/maplibre-react-native';
 import { useTileManager } from './hooks/useTileManager';
@@ -10,41 +10,42 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
   const { tileManager, isLoading, error } = useTileManager();
-  const { pins, createPin, setPlaceholderPin, clearPlaceholderPins, deletePin } = usePinManager();
+  const {
+    pins,
+    setPendingPin,
+    clearPendingPin,
+    deletePin,
+    finalizePendingPin
+  } = usePinManager();
   const [selectedLocation, setSelectedLocation] = useState(null);
+
   const mapRef = useRef(null);
   const cameraRef = useRef(null);
 
   const handleMapPress = useCallback((event) => {
-    if(!event?.geometry?.coordinates) return;
-    
+    if (!event?.geometry?.coordinates) return;
+
     const coordinates = {
       longitude: event.geometry.coordinates[0],
       latitude: event.geometry.coordinates[1]
     };
-    
-    // Set placeholder first
-    setPlaceholderPin(coordinates);
-    
-    // Then update selected location and pan
-    setSelectedLocation(coordinates);
-    
-    // Use Camera component to pan
-    cameraRef.current?.setCamera({
-      centerCoordinate: [coordinates.longitude, coordinates.latitude],
-      padding: { paddingBottom: 400 },
-      animationDuration: 1000
+
+    requestAnimationFrame(() => {
+      setPendingPin(coordinates);
+      setSelectedLocation(coordinates);
+
+      cameraRef.current?.setCamera({
+        centerCoordinate: [coordinates.longitude, coordinates.latitude],
+        padding: { paddingBottom: 400 },
+        animationDuration: 1000
+      });
     });
-  }, [setPlaceholderPin]);
+  }, [setPendingPin]);
 
   const handleBottomSheetClose = useCallback(() => {
-    // First set selected location to null
     setSelectedLocation(null);
-    // Then clear placeholders in the next frame
-    requestAnimationFrame(() => {
-      clearPlaceholderPins();
-    });
-  }, [clearPlaceholderPins]);
+    clearPendingPin();
+  }, [clearPendingPin]);
 
   if (isLoading) {
     return <ActivityIndicator />;
@@ -78,8 +79,7 @@ export default function App() {
             <PinMarker
               key={pin.id}
               pin={pin}
-              onRemove={!pin.isPlaceholder ? deletePin : undefined}
-              style={pin.isPlaceholder ? styles.placeholderPin : undefined}
+              onRemove={deletePin}
             />
           ))}
         </MapLibreGL.MapView>
@@ -90,38 +90,39 @@ export default function App() {
         >
           <PinCreationForm
             onSubmit={(emoji, message) => {
-              createPin({
-                coordinates: selectedLocation,
+              finalizePendingPin({
                 emoji,
-                message
+                message,
+                coordinates: selectedLocation,
+                timestamp: Date.now()
               });
               handleBottomSheetClose();
             }}
             onCancel={handleBottomSheetClose}
+            onEmojiSelect={() => {
+            }}
           />
         </BottomSheet>
       </View>
     </GestureHandlerRootView>
   );
+
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1 
+  container: {
+    flex: 1
   },
-  map: { 
-    flex: 1 
+  map: {
+    flex: 1
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorText: { 
+  errorText: {
     color: 'red',
     fontSize: 16,
-  },
-  placeholderPin: {
-    opacity: 0.7,
   },
 });
