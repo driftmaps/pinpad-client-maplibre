@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { Pin, PinCreateInput, PinAction, Coordinates } from '../types/pin';
 
 const generateId = () => {
@@ -18,61 +18,85 @@ export function usePinManager() {
     pendingPin: false,
   });
 
+  const pendingOperationRef = useRef<boolean>(false);
+
+
   const dispatchPinAction = useCallback((action: PinAction) => {
+
+    if (pendingOperationRef.current) {
+      console.log('Blocked by pending operation'); // Debug log
+      return;
+    }
+
+    pendingOperationRef.current = true;
+
     setState(current => {
-      switch (action.type) {
+      try {
+        switch (action.type) {
+          case 'SET_PENDING_PIN': {
+            const coordinates = action.payload as Coordinates;
 
-        case 'SET_PENDING_PIN': {
-          const coordinates = action.payload as Coordinates;
-          return {
-            pins: [...current.pins, {
-              id: 'pending-pin',
-              coordinates,
-              emoji: '📍',
-              message: '',
-              timestamp: action.timestamp,
-            }],
-            actions: [...current.actions, action],
-            pendingPin: true,
-          };
-        }
+            return {
+              ...current,
+              pendingPin: true,
+              pins: [
+                ...current.pins.filter(pin => pin.id !== 'pending-pin'),
+                {
+                  id: 'pending-pin',
+                  coordinates,
+                  emoji: '📍',
+                  message: '',
+                  timestamp: action.timestamp,
+                }
+              ],
+              actions: [...current.actions, action],
+            };
+          }
 
-        case 'FINALIZE_PENDING_PIN': {
-          if (!current.pendingPin) return current;
-          let updatedPin = current.pins.find(pin => pin.id === 'pending-pin');
-          updatedPin = {
-            ...updatedPin,
-            ...(action.payload as Partial<Pin>),
-          } as Pin;
-          return {
-            ...current,
-            pendingPin: false,
-            pins: [...current.pins.filter(pin => pin.id !== 'pending-pin'), updatedPin],
-            actions: [...current.actions, action],
-          };
-        }
+          case 'FINALIZE_PENDING_PIN': {
+            if (!current.pendingPin) return current;
+            let updatedPin = current.pins.find(pin => pin.id === 'pending-pin');
+            updatedPin = {
+              ...updatedPin,
+              ...(action.payload as Partial<Pin>),
+            } as Pin;
+            return {
+              ...current,
+              pendingPin: false,
+              pins: [...current.pins.filter(pin => pin.id !== 'pending-pin'), updatedPin],
+              actions: [...current.actions, action],
+            };
+          }
 
-        case 'CLEAR_PENDING_PIN': {
-          return {
-            ...current,
-            pendingPin: false,
-            pins: current.pins.filter(pin => pin.id !== 'pending-pin'),
-            actions: [...current.actions, action],
-          };
-        }
+          case 'CLEAR_PENDING_PIN': {
+            if (!current.pendingPin) return current;
 
-        case 'PIN_DELETE': {
-          return {
-            ...current,
-            pins: current.pins.filter(pin => pin.id !== action.payload),
-            actions: [...current.actions, action],
-          };
-        }
+            return {
+              ...current,
+              pendingPin: false,
+              pins: current.pins.filter(pin => pin.id !== 'pending-pin'),
+              actions: [...current.actions, action],
+            };
+          }
 
-        default: {
-          console.warn(`Unhandled action type: ${action.type}`);
-          return current;
+          case 'PIN_DELETE': {
+            return {
+              ...current,
+              pins: current.pins.filter(pin => pin.id !== action.payload),
+              actions: [...current.actions, action],
+            };
+          }
+
+          default: {
+            console.warn(`Unhandled action type: ${action.type}`);
+            return current;
+          }
         }
+      } catch (error) {
+        console.error('Error in dispatchPinAction:', error);
+        return current;
+      } finally {
+        pendingOperationRef.current = false;
       }
     });
   }, []);
@@ -122,8 +146,19 @@ export function usePinManager() {
     };
   }, [state]);
 
+  const isValidPin = (pin: Pin | null | undefined): pin is Pin => {
+    return pin != null &&
+      typeof pin.id === 'string' &&
+      pin.coordinates != null;
+  };
+
+  const pins = useMemo(() =>
+    state.pins.filter(isValidPin),
+    [state.pins, state.pendingPin]
+  );
+
   return {
-    pins: state.pins,
+    pins,
     actions: state.actions,
     setPendingPin,
     finalizePendingPin,

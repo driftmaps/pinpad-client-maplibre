@@ -75,11 +75,11 @@ PODS:
   - hermes-engine (0.76.3):
     - hermes-engine/Pre-built (= 0.76.3)
   - hermes-engine/Pre-built (0.76.3)
-  - maplibre-react-native (10.0.0-alpha.26):
-    - maplibre-react-native/DynamicLibrary (= 10.0.0-alpha.26)
+  - maplibre-react-native (10.0.0):
+    - maplibre-react-native/DynamicLibrary (= 10.0.0)
     - React
     - React-Core
-  - maplibre-react-native/DynamicLibrary (10.0.0-alpha.26):
+  - maplibre-react-native/DynamicLibrary (10.0.0):
     - React
     - React-Core
   - RCT-Folly (2024.01.01.00):
@@ -1979,7 +1979,7 @@ SPEC CHECKSUMS:
   fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   hermes-engine: 0555a84ea495e8e3b4bde71b597cd87fbb382888
-  maplibre-react-native: 641b2caea12d9890860bcd2806081e849d1ec2e2
+  maplibre-react-native: 71846b4b5503c8ad30d9d2875856ca8533f63363
   RCT-Folly: bf5c0376ffe4dd2cf438dcf86db385df9fdce648
   RCTDeprecation: 2c5e1000b04ab70b53956aa498bf7442c3c6e497
   RCTRequired: 5f785a001cf68a551c5f5040fb4c415672dbb481
@@ -2043,6 +2043,6 @@ SPEC CHECKSUMS:
   SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4
   Yoga: 3deb2471faa9916c8a82dda2a22d3fba2620ad37
 
-PODFILE CHECKSUM: cafa009fb04c0a6e7b69cdbfc577b4f44dc73925
+PODFILE CHECKSUM: 80300ac55481a983910d9247cdf4b102787a5f89
 
 COCOAPODS: 1.16.2
