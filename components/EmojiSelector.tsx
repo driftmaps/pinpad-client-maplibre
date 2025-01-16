@@ -13,9 +13,11 @@ export function EmojiSelector({ onSelect, testID }: EmojiSelectorProps) {
     <View style={styles.container} testID={testID}>
       <EmojiPicker
         onEmojiSelected={onSelect}
-        showSearchBar={true}
+        showSearchBar={false}
         showHistory={true}
-        columns={8}
+        showSectionTitles={false}
+        columns={6}
+        showTabs={false}
       />
     </View>
   );
@@ -23,7 +25,19 @@ export function EmojiSelector({ onSelect, testID }: EmojiSelectorProps) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 300,
+    flex: 1,
     backgroundColor: '#fff',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  tabBar: {
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  searchBar: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    margin: 8,
   },
 });

@@ -24,6 +24,7 @@ export function PinCreationForm({ onSubmit, onCancel }: PinCreationFormProps) {
         onSelect={setEmoji}
         testID="emoji-selector"
       />
+      <View style={styles.inputContainer}>
       <TextInput
         style={styles.input}
         value={message}
@@ -46,6 +47,7 @@ export function PinCreationForm({ onSubmit, onCancel }: PinCreationFormProps) {
         >
           <Text style={styles.buttonText}>Add Pin</Text>
         </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -54,19 +56,28 @@ export function PinCreationForm({ onSubmit, onCancel }: PinCreationFormProps) {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    backgroundColor: '#fff',
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between'
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
     padding: 12,
-    marginVertical: 8,
+    marginTop: 16,
     fontSize: 16,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 16,
+    paddingTop: 16,
+  },
+  inputContainer: {
+    justifyContent: 'flex-end',
+    marginTop: 'auto',
   },
   button: {
     flex: 1,

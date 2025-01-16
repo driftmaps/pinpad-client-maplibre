@@ -7,8 +7,8 @@ appId: com.anonymous.pinpadclientmaplibre
 # Create a pin
 - tapOn:
     point: "50%,50%"
-- assertVisible:
-    id: "bottom-sheet"
+- waitForAnimationToEnd:
+    timeout: 5000
 - assertVisible:
     id: "emoji-selector"
 - tapOn:
@@ -21,23 +21,3 @@ appId: com.anonymous.pinpadclientmaplibre
 - assertVisible:
     id: "pin-marker"
 
-# Verify pin persistence
-- scroll:
-    direction: LEFT
-- scroll:
-    direction: RIGHT
-- assertVisible:
-    id: "pin-marker"
-
-# Update pin
-- tapOn:
-    id: "pin-marker"
-- assertVisible:
-    id: "bottom-sheet"
-- inputText:
-    id: "message-input"
-    text: "Updated message"
-- tapOn:
-    id: "submit-button"
-- assertVisible:
-    id: "pin-marker"

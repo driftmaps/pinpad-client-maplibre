@@ -1,6 +1,5 @@
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
-import { StyleSheet } from 'react-native';
-import BottomSheetCore, { BottomSheetView } from '@gorhom/bottom-sheet';
+import React from 'react';
+import { StyleSheet, View, Modal, Pressable } from 'react-native';
 
 export function BottomSheet({ 
   visible, 
@@ -8,60 +7,50 @@ export function BottomSheet({
   children, 
   testID = 'bottom-sheet' 
 }: BottomSheetProps) {
-  const bottomSheetRef = useRef<BottomSheetCore>(null);
-  const snapPoints = useMemo(() => ['50%'], []);
-
-  const handleSheetChanges = useCallback((index: number) => {
-    if (index === -1) {
-      onClose();
-    }
-  }, [onClose]);
-
-  useEffect(() => {
-    if (visible) {
-      bottomSheetRef.current?.expand();
-    } else {
-      try {
-        bottomSheetRef.current?.close();
-      } catch (error) {
-        console.log('BottomSheet close error:', error);
-      }
-    }
-  }, [visible]);
-
-  useEffect(() => {
-    return () => {
-      try {
-        bottomSheetRef.current?.close();
-      } catch (error) {
-        console.log('BottomSheet cleanup error:', error);
-      }
-    };
-  }, []);
-
   return (
-    <BottomSheetCore
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      onChange={handleSheetChanges}
-      enablePanDownToClose={true}
-      index={visible ? 0 : -1}
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
       testID={testID}
     >
-      <BottomSheetView style={styles.contentContainer}>
-        {children}
-      </BottomSheetView>
-    </BottomSheetCore>
+      <Pressable 
+        style={styles.overlay} 
+        onPress={onClose}
+      >
+        <View 
+          style={styles.contentContainer}
+          // Prevent taps on the content from closing the modal
+          onStartShouldSetResponder={() => true}
+        >
+          {children}
+        </View>
+      </Pressable>
+    </Modal>
   );
-
 }
 
 const styles = StyleSheet.create({
-  container: {
+  overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
   },
   contentContainer: {
-    flex: 1,
+    backgroundColor: 'white',
     padding: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -3,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    maxHeight: '80%',
+    minHeight: '50%',
   },
 });
