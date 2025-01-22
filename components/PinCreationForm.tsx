@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { EmojiSelector } from './EmojiSelector';
 
@@ -12,16 +12,21 @@ export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect }: PinCreati
   const [emoji, setEmoji] = useState('📍');
   const [message, setMessage] = useState('');
 
-  const handleEmojiSelect = (selectedEmoji: string) => {
+  const handleEmojiSelect = useCallback((selectedEmoji: string) => {
     setEmoji(selectedEmoji);
     onEmojiSelect(selectedEmoji);
-  };
+  }, [onEmojiSelect]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
+    if (!emoji) return; // Prevent submission without emoji
     onSubmit(emoji, message);
-    setMessage('');
-    setEmoji('📍');
-  };
+    
+    // Delay the reset until after submission is processed
+    requestAnimationFrame(() => {
+      setMessage('');
+      setEmoji('📍');
+    });
+  }, [emoji, message, onSubmit]);
 
   return (
     <View style={styles.container}>
@@ -31,28 +36,29 @@ export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect }: PinCreati
         testID="emoji-selector"
       />
       <View style={styles.inputContainer}>
-      <TextInput
-        style={styles.input}
-        value={message}
-        onChangeText={setMessage}
-        placeholder="Enter your message"
-        testID="message-input"
-      />
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.cancelButton]}
-          onPress={onCancel}
-          testID="cancel-button"
-        >
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.submitButton]}
-          onPress={handleSubmit}
-          testID="submit-button"
-        >
-          <Text style={styles.buttonText}>Add Pin</Text>
-        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Enter your message"
+          testID="message-input"
+        />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.cancelButton]}
+            onPress={onCancel}
+            testID="cancel-button"
+          >
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.submitButton]}
+            onPress={handleSubmit}
+            testID="submit-button"
+            disabled={!emoji}
+          >
+            <Text style={styles.buttonText}>Add Pin</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

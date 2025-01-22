@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Modal, Pressable } from 'react-native';
+import { StyleSheet, View, Animated } from 'react-native';
 
 interface BottomSheetProps {
   visible: boolean;
@@ -14,34 +14,21 @@ export function BottomSheet({
   children, 
   testID = 'bottom-sheet' 
 }: BottomSheetProps) {
-  return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={onClose}
+  return visible ? (
+    <View 
+      style={[StyleSheet.absoluteFill, styles.container]} 
+      pointerEvents="box-none"
       testID={testID}
     >
-      <Pressable 
-        style={styles.overlay} 
-        onPress={onClose}
-      >
-        <View 
-          style={styles.contentContainer}
-          // Prevent taps on the content from closing the modal
-          onStartShouldSetResponder={() => true}
-        >
-          {children}
-        </View>
-      </Pressable>
-    </Modal>
-  );
+      <View style={styles.contentContainer}>
+        {children}
+      </View>
+    </View>
+  ) : null;
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.0)',
+  container: {
     justifyContent: 'flex-end',
   },
   contentContainer: {

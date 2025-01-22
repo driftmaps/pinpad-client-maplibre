@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { StyleSheet, View, ActivityIndicator, Text, InteractionManager } from 'react-native';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
+import { StyleSheet, View, ActivityIndicator, Text, InteractionManager, TouchableWithoutFeedback } from 'react-native';
 import { MapView, Camera } from '@maplibre/maplibre-react-native';
 import { useTileManager } from './hooks/useTileManager';
 import { usePinsState } from './hooks/usePinsState';
@@ -7,6 +7,8 @@ import { BottomSheet } from './components/BottomSheet';
 import { PinMarker } from './components/PinMarker';
 import { PinCreationForm } from './components/PinCreationForm';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Pin } from '@/types/pin';
+import { PinDetailsView } from './components/PinDetailsView';
 
 export default function App() {
   const { tileManager, isLoading, error } = useTileManager();
@@ -19,6 +21,7 @@ export default function App() {
     updatePendingPin
   } = usePinsState();
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedPin, setSelectedPin] = useState(null);
 
   const [initialCameraProps, setInitialCameraProps] = useState({
     centerCoordinate: [-73.72826520392081, 45.584043985983],
@@ -29,19 +32,18 @@ export default function App() {
   const isTransitioningRef = useRef(false);
   
   const handleMapPress = useCallback((event) => {
-    if (!event?.geometry?.coordinates || isTransitioningRef.current) return;
-  
-    isTransitioningRef.current = true;
-  
-    const coordinates = {
-      longitude: event.geometry.coordinates[0],
-      latitude: event.geometry.coordinates[1]
-    };
+    if (!event?.geometry?.coordinates) return;
     
-    clearPendingPin();
-    
-    // Small delay to ensure we don't get multiple events
-    setTimeout(() => {
+    if (!isTransitioningRef.current) {
+      const coordinates = {
+        longitude: event.geometry.coordinates[0],
+        latitude: event.geometry.coordinates[1]
+      };
+      
+      isTransitioningRef.current = true;
+      clearPendingPin();
+      setSelectedPin(null);
+      
       setInitialCameraProps({
         centerCoordinate: [coordinates.longitude, coordinates.latitude],
         padding: { paddingBottom: 400 },
@@ -52,11 +54,10 @@ export default function App() {
       setPendingPin(coordinates);
       setSelectedLocation(coordinates);
       
-      // Reset the transition flag after a short delay
-      setTimeout(() => {
+      InteractionManager.runAfterInteractions(() => {
         isTransitioningRef.current = false;
-      }, 300);
-    }, 0);
+      });
+    }
   }, [setPendingPin, clearPendingPin]);
   
   const handleBottomSheetClose = useCallback(() => {
@@ -65,12 +66,54 @@ export default function App() {
     isTransitioningRef.current = true;
     
     setSelectedLocation(null);
+    setSelectedPin(null);
     
     requestAnimationFrame(() => {
       clearPendingPin();
       isTransitioningRef.current = false;
     });
   }, [clearPendingPin]);
+
+  const handlePinPress = useCallback((pin) => {
+    if (!isTransitioningRef.current) {
+      isTransitioningRef.current = true;
+      
+      setInitialCameraProps({
+        centerCoordinate: [pin.coordinates.longitude, pin.coordinates.latitude],
+        padding: { paddingBottom: 400 },
+        animationMode: 'easeTo',
+        animationDuration: 250
+      });
+
+      setSelectedPin(pin);
+      setSelectedLocation(pin.coordinates);
+      clearPendingPin();
+      
+      InteractionManager.runAfterInteractions(() => {
+        isTransitioningRef.current = false;
+      });
+    }
+  }, [clearPendingPin]);
+
+  const handlePinDelete = useCallback((pin) => {
+    deletePin(pin);
+    handleBottomSheetClose();
+  }, [deletePin, handleBottomSheetClose]);
+
+  const handlePinCreate = useCallback((emoji, message) => {
+    finalizePendingPin({
+      emoji,
+      message,
+      coordinates: selectedLocation,
+      timestamp: Date.now()
+    });
+
+    requestAnimationFrame(() => {
+      setSelectedLocation(null);
+      setSelectedPin(null);
+      clearPendingPin();
+    });
+  }, [finalizePendingPin, selectedLocation, clearPendingPin]);
 
   const visiblePins = useMemo(() => 
     pins.filter(pin => pin && pin.coordinates), 
@@ -88,11 +131,13 @@ export default function App() {
       </View>
     );
   }
-  console.log(visiblePins);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <View 
+        style={styles.container}
+        pointerEvents="box-none"
+      >
         <MapView
           style={styles.map}
           mapStyle={tileManager.getStyleUrl()}
@@ -108,6 +153,7 @@ export default function App() {
               key={pin.id}
               pin={pin}
               onRemove={deletePin}
+              onPress={handlePinPress}
             />
           ))}
         </MapView>
@@ -116,21 +162,21 @@ export default function App() {
           visible={!!selectedLocation}
           onClose={handleBottomSheetClose}
         >
-          <PinCreationForm
-            onSubmit={(emoji, message) => {
-              finalizePendingPin({
-                emoji,
-                message,
-                coordinates: selectedLocation,
-                timestamp: Date.now()
-              });
-              handleBottomSheetClose();
-            }}
-            onCancel={handleBottomSheetClose}
-            onEmojiSelect={(emoji) => {
-              updatePendingPin({ emoji });
-            }}
-          />
+          {selectedPin ? (
+            <PinDetailsView
+              pin={selectedPin}
+              onClose={handleBottomSheetClose}
+              onDelete={handlePinDelete}
+            />
+          ) : (
+            <PinCreationForm
+              onSubmit={handlePinCreate}
+              onCancel={handleBottomSheetClose}
+              onEmojiSelect={(emoji) => {
+                updatePendingPin({ emoji });
+              }}
+            />
+          )}
         </BottomSheet>
       </View>
     </GestureHandlerRootView>
