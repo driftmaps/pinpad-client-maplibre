@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { StyleSheet, View, ActivityIndicator, Text, InteractionManager } from 'react-native';
 import { MapView, Camera } from '@maplibre/maplibre-react-native';
 import { useTileManager } from './hooks/useTileManager';
-import { usePinManager } from './hooks/usePinManager';
+import { usePinsState } from './hooks/usePinsState';
 import { BottomSheet } from './components/BottomSheet';
 import { PinMarker } from './components/PinMarker';
 import { PinCreationForm } from './components/PinCreationForm';
@@ -15,8 +15,9 @@ export default function App() {
     setPendingPin,
     clearPendingPin,
     deletePin,
-    finalizePendingPin
-  } = usePinManager();
+    finalizePendingPin,
+    updatePendingPin
+  } = usePinsState();
   const [selectedLocation, setSelectedLocation] = useState(null);
 
   const [initialCameraProps, setInitialCameraProps] = useState({
@@ -30,7 +31,6 @@ export default function App() {
   const handleMapPress = useCallback((event) => {
     if (!event?.geometry?.coordinates || isTransitioningRef.current) return;
   
-    // Prevent multiple rapid-fire events
     isTransitioningRef.current = true;
   
     const coordinates = {
@@ -108,7 +108,6 @@ export default function App() {
               key={pin.id}
               pin={pin}
               onRemove={deletePin}
-              style={{ zIndex: 100 }}
             />
           ))}
         </MapView>
@@ -128,7 +127,8 @@ export default function App() {
               handleBottomSheetClose();
             }}
             onCancel={handleBottomSheetClose}
-            onEmojiSelect={() => {
+            onEmojiSelect={(emoji) => {
+              updatePendingPin({ emoji });
             }}
           />
         </BottomSheet>

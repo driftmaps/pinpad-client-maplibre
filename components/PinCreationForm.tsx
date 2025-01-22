@@ -5,11 +5,17 @@ import { EmojiSelector } from './EmojiSelector';
 interface PinCreationFormProps {
   onSubmit: (emoji: string, message: string) => void;
   onCancel: () => void;
+  onEmojiSelect: (emoji: string) => void;
 }
 
-export function PinCreationForm({ onSubmit, onCancel }: PinCreationFormProps) {
+export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect }: PinCreationFormProps) {
   const [emoji, setEmoji] = useState('📍');
   const [message, setMessage] = useState('');
+
+  const handleEmojiSelect = (selectedEmoji: string) => {
+    setEmoji(selectedEmoji);
+    onEmojiSelect(selectedEmoji);
+  };
 
   const handleSubmit = () => {
     onSubmit(emoji, message);
@@ -21,7 +27,7 @@ export function PinCreationForm({ onSubmit, onCancel }: PinCreationFormProps) {
     <View style={styles.container}>
       <EmojiSelector
         selected={emoji}
-        onSelect={setEmoji}
+        onSelect={handleEmojiSelect}
         testID="emoji-selector"
       />
       <View style={styles.inputContainer}>

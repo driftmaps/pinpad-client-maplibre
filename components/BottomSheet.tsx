@@ -1,6 +1,13 @@
 import React from 'react';
 import { StyleSheet, View, Modal, Pressable } from 'react-native';
 
+interface BottomSheetProps {
+  visible: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  testID?: string;
+}
+
 export function BottomSheet({ 
   visible, 
   onClose, 
@@ -34,7 +41,7 @@ export function BottomSheet({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.0)',
     justifyContent: 'flex-end',
   },
   contentContainer: {

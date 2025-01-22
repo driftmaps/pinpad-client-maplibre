@@ -1,8 +1,16 @@
 import React, { memo } from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import MapLibreGL from '@maplibre/maplibre-react-native';
+import { MarkerView } from '@maplibre/maplibre-react-native';
+import { Pin } from '@/types/pin';
 
-export const PinMarker = memo(({ pin, onRemove, onPress, testID, style }: PinMarkerProps) => {
+interface PinMarkerProps {
+  pin: Pin;
+  onRemove: () => void;
+  onPress: (pin: Pin) => void;
+  testID?: string;
+}
+
+export const PinMarker = memo(({ pin, onRemove, onPress, testID }: PinMarkerProps) => {
   const handlePress = () => {
     if (onPress) {
       onPress(pin);
@@ -10,7 +18,7 @@ export const PinMarker = memo(({ pin, onRemove, onPress, testID, style }: PinMar
   };
 
   return (
-    <MapLibreGL.MarkerView
+    <MarkerView
       key={`${pin.id}-marker`}
       id={`${pin.id}-marker`}
       coordinate={[pin.coordinates.longitude, pin.coordinates.latitude]}
@@ -18,13 +26,13 @@ export const PinMarker = memo(({ pin, onRemove, onPress, testID, style }: PinMar
       testID={testID || 'pin-marker'}
     >
       <TouchableOpacity
-        style={[styles.markerContainer, style]}
+        style={styles.markerContainer}
         onPress={handlePress}
         testID={`pin-${pin.id}`}
       >
         <Text style={styles.emoji}>{pin.emoji}</Text>
       </TouchableOpacity>
-    </MapLibreGL.MarkerView>
+    </MarkerView>
   );
 });
 

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { Pin, PinCreateInput, PinAction, Coordinates } from '../types/pin';
 
+// TODO: Use a more intentional ID generation method
 const generateId = () => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 };
@@ -11,7 +12,7 @@ interface PinManagerState {
   pendingPin: boolean;
 }
 
-export function usePinManager() {
+export function usePinsState() {
   const [state, setState] = useState<PinManagerState>({
     pins: [],
     actions: [],
@@ -24,7 +25,7 @@ export function usePinManager() {
   const dispatchPinAction = useCallback((action: PinAction) => {
 
     if (pendingOperationRef.current) {
-      console.log('Blocked by pending operation'); // Debug log
+      console.warn('Blocked by pending operation');
       return;
     }
 
@@ -87,6 +88,24 @@ export function usePinManager() {
             };
           }
 
+          case 'UPDATE_PENDING_PIN': {
+            if (!current.pendingPin) return current;
+            const pendingPinIndex = current.pins.findIndex(pin => pin.id === 'pending-pin');
+            if (pendingPinIndex === -1) return current;
+
+            const updatedPins = [...current.pins];
+            updatedPins[pendingPinIndex] = {
+              ...updatedPins[pendingPinIndex],
+              ...(action.payload as Partial<Pin>),
+            };
+
+            return {
+              ...current,
+              pins: updatedPins,
+              actions: [...current.actions, action],
+            };
+          }
+
           default: {
             console.warn(`Unhandled action type: ${action.type}`);
             return current;
@@ -137,6 +156,13 @@ export function usePinManager() {
     });
   }, [dispatchPinAction]);
 
+  const updatePendingPin = useCallback((updates: Partial<Pin>) => {
+    dispatchPinAction({
+      type: 'UPDATE_PENDING_PIN',
+      payload: updates,
+      timestamp: Date.now(),
+    });
+  }, [dispatchPinAction]);
 
   const exportData = useCallback(() => {
     return {
@@ -165,5 +191,6 @@ export function usePinManager() {
     deletePin,
     clearPendingPin,
     exportData,
+    updatePendingPin,
   };
 }
