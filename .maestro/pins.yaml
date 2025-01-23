@@ -26,4 +26,12 @@ appId: com.anonymous.pinpadclientmaplibre
 - tapOn:
     id: "cancel-button"
 - assertNotVisible: "📍"
+- swipe:
+    start: "68%,10%"
+    end: "64%,71%"
+    duration: 1198
+- tapOn: "😇"
+- tapOn:
+    id: "delete-button"
+- assertNotVisible: "😇"
 

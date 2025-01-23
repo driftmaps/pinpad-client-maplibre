@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
-import { Pin, PinCreateInput, PinAction, Coordinates } from '../types/pin';
+import { Pin, PinAction, Coordinates } from '../types/pin';
 
 // TODO: Use a more intentional ID generation method
 const generateId = () => {
@@ -11,6 +11,16 @@ interface PinManagerState {
   actions: PinAction[];
   pendingPin: boolean;
 }
+
+const PIN_ACTIONS = {
+  SET_PENDING_PIN: 'SET_PENDING_PIN',
+  FINALIZE_PENDING_PIN: 'FINALIZE_PENDING_PIN',
+  CLEAR_PENDING_PIN: 'CLEAR_PENDING_PIN',
+  DELETE_PIN: 'DELETE_PIN',
+  UPDATE_PENDING_PIN: 'UPDATE_PENDING_PIN',
+} as const;
+
+type PinActionType = typeof PIN_ACTIONS[keyof typeof PIN_ACTIONS];
 
 export function usePinsState() {
   const [state, setState] = useState<PinManagerState>({
@@ -24,7 +34,8 @@ export function usePinsState() {
 
   const dispatchPinAction = useCallback((action: PinAction) => {
     if (pendingOperationRef.current) {
-      if (!['SET_PENDING_PIN', 'CLEAR_PENDING_PIN'].includes(action.type)) {
+      const allowedActions = [PIN_ACTIONS.SET_PENDING_PIN, PIN_ACTIONS.CLEAR_PENDING_PIN] as Array<PinActionType>;
+      if (!allowedActions.includes(action.type as PinActionType)) {
         console.warn('Blocked by pending operation');
         return;
       }
@@ -32,12 +43,11 @@ export function usePinsState() {
 
 
     setState(current => {
-      pendingOperationRef.current = true;  // Set at the start of the state update
+      pendingOperationRef.current = true;
       try {
         switch (action.type) {
-          case 'SET_PENDING_PIN': {
+          case PIN_ACTIONS.SET_PENDING_PIN: {
             const coordinates = action.payload as Coordinates;
-
             return {
               ...current,
               pendingPin: true,
@@ -55,17 +65,15 @@ export function usePinsState() {
             };
           }
 
-          case 'FINALIZE_PENDING_PIN': {
+          case PIN_ACTIONS.FINALIZE_PENDING_PIN: {
             if (!current.pendingPin) return current;
             const pendingPinIndex = current.pins.findIndex(pin => pin.id === 'pending-pin');
             if (pendingPinIndex === -1) return current;
-
             const updatedPins = [...current.pins];
             updatedPins[pendingPinIndex] = {
               ...updatedPins[pendingPinIndex],
               ...(action.payload as Partial<Pin>),
             };
-
             return {
               ...current,
               pendingPin: false,
@@ -74,9 +82,8 @@ export function usePinsState() {
             };
           }
 
-          case 'CLEAR_PENDING_PIN': {
+          case PIN_ACTIONS.CLEAR_PENDING_PIN: {
             if (!current.pendingPin) return current;
-
             return {
               ...current,
               pendingPin: false,
@@ -85,15 +92,17 @@ export function usePinsState() {
             };
           }
 
-          case 'PIN_DELETE': {
+          case PIN_ACTIONS.DELETE_PIN: {
+            const pinToDelete = action.payload as Pin;
+            const filteredPins = current.pins.filter(pin => pin.id !== pinToDelete.id);
             return {
               ...current,
-              pins: current.pins.filter(pin => pin.id !== action.payload),
+              pins: filteredPins,
               actions: [...current.actions, action],
             };
           }
 
-          case 'UPDATE_PENDING_PIN': {
+          case PIN_ACTIONS.UPDATE_PENDING_PIN: {
             if (!current.pendingPin) return current;
             const pendingPinIndex = current.pins.findIndex(pin => pin.id === 'pending-pin');
             if (pendingPinIndex === -1) return current;
@@ -130,7 +139,7 @@ export function usePinsState() {
 
   const setPendingPin = useCallback((coordinates: Coordinates) => {
     dispatchPinAction({
-      type: 'SET_PENDING_PIN',
+      type: PIN_ACTIONS.SET_PENDING_PIN,
       payload: coordinates,
       timestamp: Date.now(),
     });
@@ -138,7 +147,7 @@ export function usePinsState() {
 
   const finalizePendingPin = useCallback((pinData: Partial<Pin>) => {
     dispatchPinAction({
-      type: 'FINALIZE_PENDING_PIN',
+      type: PIN_ACTIONS.FINALIZE_PENDING_PIN,
       payload: {
         id: generateId(),
         ...pinData,
@@ -150,7 +159,7 @@ export function usePinsState() {
 
   const deletePin = useCallback((id: string) => {
     dispatchPinAction({
-      type: 'PIN_DELETE',
+      type: PIN_ACTIONS.DELETE_PIN,
       payload: id,
       timestamp: Date.now(),
     });
@@ -158,7 +167,7 @@ export function usePinsState() {
 
   const clearPendingPin = useCallback(() => {
     dispatchPinAction({
-      type: 'CLEAR_PENDING_PIN',
+      type: PIN_ACTIONS.CLEAR_PENDING_PIN,
       payload: null,
       timestamp: Date.now(),
     });
@@ -166,7 +175,7 @@ export function usePinsState() {
 
   const updatePendingPin = useCallback((updates: Partial<Pin>) => {
     dispatchPinAction({
-      type: 'UPDATE_PENDING_PIN',
+      type: PIN_ACTIONS.UPDATE_PENDING_PIN,
       payload: updates,
       timestamp: Date.now(),
     });

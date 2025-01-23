@@ -8,7 +8,6 @@ interface PinMarkerProps {
   onRemove: () => void;
   onPress: (pin: Pin) => void;
   testID?: string;
-  showCallout: boolean;
 }
 
 export const PinMarker = memo(({ pin, onRemove, onPress, testID }: PinMarkerProps) => {
