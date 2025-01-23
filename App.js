@@ -20,6 +20,7 @@ export default function App() {
   const [selectedPin, setSelectedPin] = useState(null);
 
   const [initialCameraProps, setInitialCameraProps] = useState({
+    // Montreal coordinates
     centerCoordinate: [-73.72826520392081, 45.584043985983],
     zoomLevel: 10,
   });

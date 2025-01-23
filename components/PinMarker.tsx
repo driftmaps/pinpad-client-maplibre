@@ -5,7 +5,7 @@ import { Pin } from '@/types/pin';
 
 interface PinMarkerProps {
   pin: Pin;
-  onRemove: () => void;
+  onRemove: (pin: Pin) => void;
   onPress: (pin: Pin) => void;
   testID?: string;
 }

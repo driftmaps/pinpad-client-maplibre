@@ -18,7 +18,7 @@ export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect }: PinCreati
   }, [onEmojiSelect]);
 
   const handleSubmit = useCallback(() => {
-    if (!emoji) return; // Prevent submission without emoji
+    if (!emoji) return;
     onSubmit(emoji, message);
     
     // Delay the reset until after submission is processed
