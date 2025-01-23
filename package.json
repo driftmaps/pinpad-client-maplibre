@@ -11,7 +11,7 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "test:maestro": "maestro test .maestro/mapview.yaml",
+    "test:maestro": "maestro test .maestro/",
     "test:maestro:ios": "bash tests/test-ios.sh",
     "test:maestro:android": "bash tests/test-android.sh",
     "generate-test-data": "cd assets && zip -r test.drift tiles"

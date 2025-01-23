@@ -17,15 +17,16 @@ export const PinMarker = memo(({ pin, onRemove, onPress, testID }: PinMarkerProp
       key={`${pin.id}-marker`}
       id={`${pin.id}-marker`}
       coordinate={[pin.coordinates.longitude, pin.coordinates.latitude]}
-      testID={testID || 'pin-marker'}
     >
       <TouchableOpacity
         style={styles.markerContainer}
         onPress={() => onPress(pin)}
         testID={`pin-${pin.id}`}
         activeOpacity={0.7}
+        accessible={false}
+        focusable={false}
       >
-        <Text style={styles.emoji}>{pin.emoji}</Text>
+        <Text testID={`pin-${pin.id}-emoji`} style={styles.emoji}>{pin.emoji}</Text>
       </TouchableOpacity>
     </PointAnnotation>
   );

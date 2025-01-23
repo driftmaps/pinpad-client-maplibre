@@ -1,0 +1,29 @@
+appId: com.anonymous.pinpadclientmaplibre
+---
+- launchApp
+- assertVisible:
+    id: "map-view"
+- tapOn:
+    point: "50%,50%"
+- assertVisible: "📍"
+- tapOn:
+    point: "15%,70%"
+- assertVisible:
+    id: "pin-pending-pin"
+- assertVisible: "😇"
+- tapOn:
+    id: "message-input"
+- inputText: "Hello World"
+- tapOn:
+    id: "submit-button"
+- tapOn: "😇"
+- assertVisible: "Hello World"
+- tapOn:
+    id: "map-view"
+# TODO: investigate why MapLibre is absorbing the first tap after focus re-enter
+- tapOn:
+    id: "map-view"
+- tapOn:
+    id: "cancel-button"
+- assertNotVisible: "📍"
+

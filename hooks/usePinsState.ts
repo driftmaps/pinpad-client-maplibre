@@ -23,15 +23,16 @@ export function usePinsState() {
 
 
   const dispatchPinAction = useCallback((action: PinAction) => {
-
     if (pendingOperationRef.current) {
-      console.warn('Blocked by pending operation');
-      return;
+      if (!['SET_PENDING_PIN', 'CLEAR_PENDING_PIN'].includes(action.type)) {
+        console.warn('Blocked by pending operation');
+        return;
+      }
     }
 
-    pendingOperationRef.current = true;
 
     setState(current => {
+      pendingOperationRef.current = true;  // Set at the start of the state update
       try {
         switch (action.type) {
           case 'SET_PENDING_PIN': {
@@ -56,15 +57,19 @@ export function usePinsState() {
 
           case 'FINALIZE_PENDING_PIN': {
             if (!current.pendingPin) return current;
-            let updatedPin = current.pins.find(pin => pin.id === 'pending-pin');
-            updatedPin = {
-              ...updatedPin,
+            const pendingPinIndex = current.pins.findIndex(pin => pin.id === 'pending-pin');
+            if (pendingPinIndex === -1) return current;
+
+            const updatedPins = [...current.pins];
+            updatedPins[pendingPinIndex] = {
+              ...updatedPins[pendingPinIndex],
               ...(action.payload as Partial<Pin>),
-            } as Pin;
+            };
+
             return {
               ...current,
               pendingPin: false,
-              pins: [...current.pins.filter(pin => pin.id !== 'pending-pin'), updatedPin],
+              pins: updatedPins,
               actions: [...current.actions, action],
             };
           }
@@ -115,7 +120,10 @@ export function usePinsState() {
         console.error('Error in dispatchPinAction:', error);
         return current;
       } finally {
-        pendingOperationRef.current = false;
+        // Use setTimeout to ensure the ref is reset after React has processed the state update
+        setTimeout(() => {
+          pendingOperationRef.current = false;
+        }, 0);
       }
     });
   }, []);

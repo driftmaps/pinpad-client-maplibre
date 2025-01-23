@@ -7,7 +7,6 @@ import { BottomSheet } from './components/BottomSheet';
 import { PinMarker } from './components/PinMarker';
 import { PinCreationForm } from './components/PinCreationForm';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Pin } from '@/types/pin';
 import { PinDetailsView } from './components/PinDetailsView';
 
 export default function App() {
@@ -136,13 +135,15 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View 
         style={styles.container}
-        pointerEvents="box-none"
+        pointerEvents="auto"
       >
         <MapView
           style={styles.map}
           mapStyle={tileManager.getStyleUrl()}
           testID="map-view"
           onPress={handleMapPress}
+          accessible={false}
+          focusable={false}
         >
           <Camera
             ref={cameraRef}
@@ -186,11 +187,10 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   map: {
     flex: 1,
-    zIndex: -1
   },
   errorContainer: {
     flex: 1,

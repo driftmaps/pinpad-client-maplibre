@@ -8,9 +8,9 @@ interface EmojiSelectorProps {
   testID?: string;
 }
 
-export function EmojiSelector({ onSelect, testID }: EmojiSelectorProps) {
+export function EmojiSelector({ onSelect }: EmojiSelectorProps) {
   return (
-    <View style={styles.container} testID={testID}>
+    <View style={styles.container} testID={"emoji-selector"} accessible={true} accessibilityLabel={"emoji-selector"}>
       <EmojiPicker
         onEmojiSelected={onSelect}
         showSearchBar={false}
