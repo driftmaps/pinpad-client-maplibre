@@ -106,7 +106,7 @@ jobs:
           until maestro test .maestro/ || [ $attempt -ge $max_attempts ]; do
             echo "Attempt $attempt failed. Retrying..."
             attempt=$((attempt + 1))
-            
+            xcrun simctl io booted screenshot "failed-test-screenshot-${attempt}.png"
             sleep 5
           done
           
@@ -122,7 +122,7 @@ jobs:
         if: failure()
         run: |
           maestro hierarchy
-          xcrun simctl io booted screenshot "failed-test-screenshot.png"
+          xcrun simctl io booted screenshot "failed-test-screenshot-final.png"
 
       - name: Upload Maestro artifacts
         if: always()

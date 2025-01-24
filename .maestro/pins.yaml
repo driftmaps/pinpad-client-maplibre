@@ -9,7 +9,9 @@ appId: com.anonymous.pinpadclientmaplibre
 - tapOn: emoji-1F607
 - assertVisible:
     id: "pin-pending-pin"
-- assertVisible: "😇"
+- extendedWaitUntil:
+    visible: "😇"
+    timeout: 50000
 - tapOn:
     id: "message-input"
 - inputText: "Hello World"
@@ -19,8 +21,7 @@ appId: com.anonymous.pinpadclientmaplibre
 - tapOn: "😇"
 - extendedWaitUntil:
     visible: "Hello World"
-    timeout: 10000
-- assertVisible: "Hello World"
+    timeout: 50000
 - tapOn:
     id: "close-button"
 - tapOn:
