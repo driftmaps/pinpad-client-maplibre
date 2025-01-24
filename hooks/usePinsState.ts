@@ -67,17 +67,23 @@ export function usePinsState() {
 
           case PIN_ACTIONS.FINALIZE_PENDING_PIN: {
             if (!current.pendingPin) return current;
-            const pendingPinIndex = current.pins.findIndex(pin => pin.id === 'pending-pin');
-            if (pendingPinIndex === -1) return current;
-            const updatedPins = [...current.pins];
-            updatedPins[pendingPinIndex] = {
-              ...updatedPins[pendingPinIndex],
+            const pendingPin = current.pins.find(pin => pin.id === 'pending-pin');
+            if (!pendingPin) return current;
+
+            const newPin = {
+              ...pendingPin,
               ...(action.payload as Partial<Pin>),
+              id: generateId(),
+              timestamp: Date.now(),
             };
+
             return {
               ...current,
               pendingPin: false,
-              pins: updatedPins,
+              pins: [
+                ...current.pins.filter(pin => pin.id !== 'pending-pin'),
+                newPin
+              ],
               actions: [...current.actions, action],
             };
           }
@@ -129,7 +135,6 @@ export function usePinsState() {
         console.error('Error in dispatchPinAction:', error);
         return current;
       } finally {
-        // Use setTimeout to ensure the ref is reset after React has processed the state update
         setTimeout(() => {
           pendingOperationRef.current = false;
         }, 0);
@@ -151,6 +156,7 @@ export function usePinsState() {
       payload: {
         id: generateId(),
         ...pinData,
+        message: pinData.message || '',
         timestamp: Date.now(),
       },
       timestamp: Date.now(),
