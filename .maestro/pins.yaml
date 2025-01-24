@@ -20,7 +20,8 @@ appId: com.anonymous.pinpadclientmaplibre
     id: "submit-button"
 - tapOn: "😇"
 - extendedWaitUntil:
-    visible: "Hello World"
+    visible:
+        text: "Hello World"
     timeout: 50000
 - tapOn:
     id: "close-button"

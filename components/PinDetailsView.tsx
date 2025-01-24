@@ -20,6 +20,7 @@ export function PinDetailsView({ pin, onClose, onDelete }: PinDetailsViewProps) 
         }}
         accessibilityLabel={pin.message}
         accessible={true}
+        testID="pin-message"
         >
           {pin.message}
         </Text>
