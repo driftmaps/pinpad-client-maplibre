@@ -41,9 +41,9 @@ export function PinManagement({
         ) : (
           <PinCreationForm
             onSubmit={onPinCreate}
+            onMessageChange={(message) => onUpdatePendingPin({ message })}
             onCancel={onClose}
             onEmojiSelect={(emoji) => onUpdatePendingPin({ emoji })}
-            onMessageChange={(message) => onUpdatePendingPin({ message })}
           />
         )}
     </BottomSheet>

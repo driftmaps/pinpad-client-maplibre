@@ -20,7 +20,6 @@ const PIN_ACTIONS = {
   UPDATE_PENDING_PIN: 'UPDATE_PENDING_PIN',
 } as const;
 
-type PinActionType = typeof PIN_ACTIONS[keyof typeof PIN_ACTIONS];
 
 export function usePinsState() {
   const [state, setState] = useState<PinManagerState>({
@@ -29,21 +28,30 @@ export function usePinsState() {
     pendingPin: false,
   });
 
-  const pendingOperationRef = useRef<boolean>(false);
-
+  const pendingUpdateRef = useRef(false);
+  const lastUpdateTimestampRef = useRef(0);
 
   const dispatchPinAction = useCallback((action: PinAction) => {
-    if (pendingOperationRef.current) {
-      const allowedActions = [PIN_ACTIONS.SET_PENDING_PIN, PIN_ACTIONS.CLEAR_PENDING_PIN, PIN_ACTIONS.FINALIZE_PENDING_PIN] as Array<PinActionType>;
-      if (!allowedActions.includes(action.type as PinActionType)) {
-        console.warn('Blocked by pending operation');
-        return;
-      }
-    }
-
-
     setState(current => {
-      pendingOperationRef.current = true;
+      const lastAction = current.actions[current.actions.length - 1];
+      const now = Date.now();
+      // TODO: determine if this state sync code is necessary, possibly migrate to library
+      if (action.type === PIN_ACTIONS.FINALIZE_PENDING_PIN &&
+        lastAction?.type === PIN_ACTIONS.UPDATE_PENDING_PIN &&
+        now - lastUpdateTimestampRef.current < 50 &&
+        !pendingUpdateRef.current) {
+        pendingUpdateRef.current = true;
+        queueMicrotask(() => {
+          pendingUpdateRef.current = false;
+          dispatchPinAction(action);
+        });
+        return current;
+      }
+
+      if (action.type === PIN_ACTIONS.UPDATE_PENDING_PIN) {
+        lastUpdateTimestampRef.current = now;
+      }
+
       try {
         switch (action.type) {
           case PIN_ACTIONS.SET_PENDING_PIN: {
@@ -134,10 +142,6 @@ export function usePinsState() {
       } catch (error) {
         console.error('Error in dispatchPinAction:', error);
         return current;
-      } finally {
-        setTimeout(() => {
-          pendingOperationRef.current = false;
-        }, 0);
       }
     });
   }, []);
