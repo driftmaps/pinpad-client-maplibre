@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { Annotation, Callout, PointAnnotation } from '@maplibre/maplibre-react-native';
+import { TouchableOpacity, Text, StyleSheet, View, Platform } from 'react-native';
+import {  MarkerView } from '@maplibre/maplibre-react-native';
 import { Pin } from '@/types/pin';
 
 interface PinMarkerProps {
@@ -12,10 +12,11 @@ interface PinMarkerProps {
 
 export const PinMarker = memo(({ pin, onRemove, onPress, testID }: PinMarkerProps) => {
   return (
-    <PointAnnotation
+    <MarkerView
       key={`${pin.id}-marker`}
       id={`${pin.id}-marker`}
       coordinate={[pin.coordinates.longitude, pin.coordinates.latitude]}
+      anchor={{ x: 0.5, y: 0.5 }}
     >
       <TouchableOpacity
         style={styles.markerContainer}
@@ -27,7 +28,7 @@ export const PinMarker = memo(({ pin, onRemove, onPress, testID }: PinMarkerProp
       >
         <Text testID={`pin-${pin.id}-emoji`} style={styles.emoji}>{pin.emoji}</Text>
       </TouchableOpacity>
-    </PointAnnotation>
+    </MarkerView>
   );
 });
 
@@ -36,15 +37,24 @@ PinMarker.displayName = 'PinMarker';
 const styles = StyleSheet.create({
   markerContainer: {
     padding: 8,
-    backgroundColor: 'transparent',
     borderRadius: 20,
-    elevation: 5,
-  },
-  calloutContainer: {
-    marginLeft: -68,
-    marginTop: -40,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    ...Platform.select({
+      android: {
+        elevation: 5,
+        width: 'auto',
+        alignSelf: 'center',
+      }
+    }),
   },
   emoji: {
     fontSize: 24,
+    textAlign: 'center',
   },
 });

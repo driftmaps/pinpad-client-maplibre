@@ -25,28 +25,26 @@ export function MapContainer({
 
   return (
     <MapView
-      style= { styles.map }
-  mapStyle = { styleUrl }
-  testID = "map-view"
-  onPress = { onMapPress }
-  accessible = { false}
-  focusable = { false}
+      style={styles.map}
+      mapStyle={styleUrl}
+      testID="map-view"
+      onPress={onMapPress}
     >
-    <Camera
-        ref={ cameraRef }
-  {...cameraProps }
+      <Camera
+        ref={cameraRef}
+        {...cameraProps}
       />
-  {
-    pins.map(pin => (
-      <PinMarker
-          key= { pin.id }
-          pin = { pin }
-          onRemove = { onPinRemove }
-          onPress = { onPinPress }
-      />
-      ))
-  }
-  </MapView>
+      {
+        pins.map(pin => (
+          <PinMarker
+            key={pin.id}
+            pin={pin}
+            onRemove={onPinRemove}
+            onPress={onPinPress}
+          />
+        ))
+      }
+    </MapView>
   );
 }
 
