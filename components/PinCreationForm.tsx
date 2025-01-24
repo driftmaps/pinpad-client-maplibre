@@ -6,9 +6,10 @@ interface PinCreationFormProps {
   onSubmit: (emoji: string, message: string) => void;
   onCancel: () => void;
   onEmojiSelect: (emoji: string) => void;
+  onMessageChange: (message: string) => void;
 }
 
-export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect }: PinCreationFormProps) {
+export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect, onMessageChange }: PinCreationFormProps) {
   const [emoji, setEmoji] = useState('📍');
   const [message, setMessage] = useState('');
 
@@ -16,6 +17,11 @@ export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect }: PinCreati
     setEmoji(selectedEmoji);
     onEmojiSelect(selectedEmoji);
   }, [onEmojiSelect]);
+
+  const handleMessageChange = useCallback((text: string) => {
+    setMessage(text);
+    onMessageChange(text);
+  }, [onMessageChange]);
 
   const handleSubmit = useCallback(() => {
     if (!emoji) return;
@@ -42,7 +48,7 @@ export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect }: PinCreati
         <TextInput
           style={styles.input}
           value={message}
-          onChangeText={setMessage}
+          onChangeText={handleMessageChange}
           placeholder="Enter your message"
           testID="message-input"
         />

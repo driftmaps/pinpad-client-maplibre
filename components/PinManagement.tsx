@@ -43,6 +43,7 @@ export function PinManagement({
             onSubmit={onPinCreate}
             onCancel={onClose}
             onEmojiSelect={(emoji) => onUpdatePendingPin({ emoji })}
+            onMessageChange={(message) => onUpdatePendingPin({ message })}
           />
         )}
     </BottomSheet>

@@ -13,6 +13,7 @@ appId: com.anonymous.pinpadclientmaplibre
 - tapOn:
     id: "message-input"
 - inputText: "Hello World"
+- hideKeyboard
 - tapOn:
     id: "submit-button"
 - tapOn: "😇"

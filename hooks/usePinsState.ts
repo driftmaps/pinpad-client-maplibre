@@ -34,7 +34,7 @@ export function usePinsState() {
 
   const dispatchPinAction = useCallback((action: PinAction) => {
     if (pendingOperationRef.current) {
-      const allowedActions = [PIN_ACTIONS.SET_PENDING_PIN, PIN_ACTIONS.CLEAR_PENDING_PIN] as Array<PinActionType>;
+      const allowedActions = [PIN_ACTIONS.SET_PENDING_PIN, PIN_ACTIONS.CLEAR_PENDING_PIN, PIN_ACTIONS.FINALIZE_PENDING_PIN] as Array<PinActionType>;
       if (!allowedActions.includes(action.type as PinActionType)) {
         console.warn('Blocked by pending operation');
         return;
