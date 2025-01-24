@@ -6,8 +6,7 @@ appId: com.anonymous.pinpadclientmaplibre
 - tapOn:
     point: "50%,50%"
 - assertVisible: "📍"
-- tapOn:
-    point: "15%,70%"
+- tapOn: emoji-1F607
 - assertVisible:
     id: "pin-pending-pin"
 - assertVisible: "😇"
@@ -19,8 +18,9 @@ appId: com.anonymous.pinpadclientmaplibre
 - tapOn: "😇"
 - assertVisible: "Hello World"
 - tapOn:
+    id: "close-button"
+- tapOn:
     id: "map-view"
-# TODO: investigate why MapLibre is absorbing the first tap after focus re-enter
 - tapOn:
     id: "map-view"
 - tapOn:

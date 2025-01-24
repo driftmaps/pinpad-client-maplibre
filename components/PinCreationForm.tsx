@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { EmojiSelector } from './EmojiSelector';
+import { EmojiSelectionForm } from './EmojiSelectionForm';
 
 interface PinCreationFormProps {
   onSubmit: (emoji: string, message: string) => void;
@@ -30,7 +30,7 @@ export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect }: PinCreati
 
   return (
     <View style={styles.container}>
-      <EmojiSelector
+      <EmojiSelectionForm
         selected={emoji}
         onSelect={handleEmojiSelect}
         testID="emoji-selector"

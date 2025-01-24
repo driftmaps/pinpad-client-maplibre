@@ -24,6 +24,7 @@
     "@gorhom/bottom-sheet": "^5",
     "@maplibre/maplibre-react-native": "^10.0.0",
     "@react-navigation/native": "^7.0.0",
+    "emoji-datasource": "^15.1.2",
     "expo": "~52.0.11",
     "expo-asset": "~11.0.1",
     "expo-blur": "~14.0.1",
