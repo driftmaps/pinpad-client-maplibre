@@ -99,7 +99,6 @@ jobs:
 
       - name: Run Maestro E2E tests
         run: |
-          
           max_attempts=4
           attempt=1
           
@@ -107,6 +106,20 @@ jobs:
             echo "Attempt $attempt failed. Retrying..."
             attempt=$((attempt + 1))
             xcrun simctl io booted screenshot "failed-test-screenshot-${attempt}.png"
+            
+            # Upload screenshot immediately after taking it
+            if [ -f "failed-test-screenshot-${attempt}.png" ]; then
+              mkdir -p test-artifacts/attempt-${attempt}
+              mv "failed-test-screenshot-${attempt}.png" test-artifacts/attempt-${attempt}/
+              
+              # Upload the screenshot for this attempt
+              echo "::group::Upload Screenshot Attempt ${attempt}"
+              tar czf "screenshot-attempt-${attempt}.tar.gz" test-artifacts/attempt-${attempt}
+              echo "### Screenshot from failed attempt ${attempt} :camera_flash:" >> $GITHUB_STEP_SUMMARY
+              echo "![Failed Test Screenshot ${attempt}]($(pwd)/test-artifacts/attempt-${attempt}/failed-test-screenshot-${attempt}.png)" >> $GITHUB_STEP_SUMMARY
+              echo "::endgroup::"
+            fi
+            
             sleep 5
           done
           
@@ -123,6 +136,15 @@ jobs:
         run: |
           maestro hierarchy
           xcrun simctl io booted screenshot "failed-test-screenshot-final.png"
+          
+          # Upload final failure screenshot immediately
+          if [ -f "failed-test-screenshot-final.png" ]; then
+            mkdir -p test-artifacts/final
+            mv "failed-test-screenshot-final.png" test-artifacts/final/
+            
+            echo "### Final Failure Screenshot :x:" >> $GITHUB_STEP_SUMMARY
+            echo "![Final Failed Test Screenshot]($(pwd)/test-artifacts/final/failed-test-screenshot-final.png)" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Upload Maestro artifacts
         if: always()
@@ -133,4 +155,5 @@ jobs:
             ~/Library/Logs/maestro/
             ~/.maestro/tests/
             ~/.maestro/screenshots/
-            failed-test-screenshot.png
+            failed-test-screenshot-final.png
+            failed-test-screenshot-*.png
