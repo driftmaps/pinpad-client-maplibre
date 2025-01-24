@@ -12,7 +12,17 @@ export function PinDetailsView({ pin, onClose, onDelete }: PinDetailsViewProps) 
   return (
     <View style={styles.container}>
       <Text style={styles.emoji}>{pin.emoji}</Text>
-      <Text style={styles.message}>{pin.message}</Text>
+      <Text
+        // Force iOS to render the text
+        style={[styles.message, {opacity: 1}]}
+        onLayout={(e) => {
+          console.log(e.nativeEvent.layout);
+        }}
+        accessibilityLabel={pin.message}
+        accessible={true}
+        >
+          {pin.message}
+        </Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, styles.closeButton]}
