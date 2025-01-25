@@ -26,7 +26,17 @@ export const PinMarker = memo(({ pin, onRemove, onPress, testID }: PinMarkerProp
         accessible={false}
         focusable={false}
       >
-        <Text testID={`pin-${pin.id}-emoji`} style={styles.emoji}>{pin.emoji}</Text>
+        <Text
+          testID={`pin-${pin.id}-emoji`}
+          style={styles.emoji}
+          importantForAccessibility="no-hide-descendants"
+          allowFontScaling={false}
+          suppressHighlighting={true}
+          accessibilityLabel={pin.emoji}
+          accessible={true}
+        >
+          {pin.emoji}
+        </Text>
       </TouchableOpacity>
     </MarkerView>
   );

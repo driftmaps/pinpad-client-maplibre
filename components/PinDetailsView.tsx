@@ -10,7 +10,7 @@ interface PinDetailsViewProps {
 
 export function PinDetailsView({ pin, onClose, onDelete }: PinDetailsViewProps) {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessible={false}>
       <Text style={styles.emoji}>{pin.emoji}</Text>
       <Text
         // Force iOS to render the text
@@ -21,6 +21,9 @@ export function PinDetailsView({ pin, onClose, onDelete }: PinDetailsViewProps) 
         accessibilityLabel={pin.message}
         accessible={true}
         testID="pin-message"
+        importantForAccessibility="no-hide-descendants"
+        allowFontScaling={false}
+        suppressHighlighting={true}
         >
           {pin.message}
         </Text>

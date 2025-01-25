@@ -114,10 +114,6 @@ jobs:
               mkdir -p "$artifact_dir"
               cp "failed-test-screenshot-${attempt}.png" "$artifact_dir/"
               
-              # Upload the screenshot for this attempt
-              echo "::group::Upload Screenshot Attempt ${attempt}"
-              echo "### Screenshot from failed attempt ${attempt} :camera_flash:" >> $GITHUB_STEP_SUMMARY
-              echo "Failed test screenshot saved to: $artifact_dir/failed-test-screenshot-${attempt}.png" >> $GITHUB_STEP_SUMMARY
             fi
             
             sleep 5
@@ -143,9 +139,6 @@ jobs:
             artifact_dir="test-artifacts/${{ github.run_id }}/${{ matrix.device }}/final"
             mkdir -p "$artifact_dir"
             cp "failed-test-screenshot-final.png" "$artifact_dir/"
-            
-            echo "### Final Failure Screenshot :x:" >> $GITHUB_STEP_SUMMARY
-            echo "Final failure screenshot saved to: $artifact_dir/failed-test-screenshot-final.png" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload Maestro artifacts
