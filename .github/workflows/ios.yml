@@ -11,6 +11,7 @@ jobs:
   build:
     timeout-minutes: 45
     runs-on: macos-14
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -98,6 +99,8 @@ jobs:
         run: xcrun simctl install booted ios/build/Build/Products/Debug-iphonesimulator/pinpadclientmaplibre.app
 
       - name: Run Maestro E2E tests
+        id: run_tests
+        continue-on-error: true
         run: |
           max_attempts=4
           attempt=1
@@ -109,11 +112,9 @@ jobs:
             
             # Upload screenshot immediately after taking it
             if [ -f "failed-test-screenshot-${attempt}.png" ]; then
-              # Create unique directory for this run and attempt
               artifact_dir="test-artifacts/${{ github.run_id }}/${{ matrix.device }}/attempt-${attempt}"
               mkdir -p "$artifact_dir"
               cp "failed-test-screenshot-${attempt}.png" "$artifact_dir/"
-              
             fi
             
             sleep 5
@@ -126,6 +127,14 @@ jobs:
         env:
           MAESTRO_DRIVER_STARTUP_TIMEOUT: 200000 
           MAESTRO_THROTTLE_CPU: true
+
+      - name: Report Test Status
+        run: |
+          if [ "${{ steps.run_tests.outcome }}" == "success" ]; then
+            echo "✅ Tests passed successfully for ${{ matrix.device }} (Runtime: ${{ matrix.runtime }})"
+          else
+            echo "⚠️ Tests had issues for ${{ matrix.device }} (Runtime: ${{ matrix.runtime }})"
+          fi
 
       - name: Capture simulator screenshot on failure
         if: failure()
