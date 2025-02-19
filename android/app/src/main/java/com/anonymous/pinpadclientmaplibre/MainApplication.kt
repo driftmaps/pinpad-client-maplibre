@@ -15,16 +15,22 @@ import com.facebook.soloader.SoLoader
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.ReactInstanceEventListener
 
 class MainApplication : Application(), ReactApplication {
+
+  companion object {
+    // Global storage for the ReactContext
+    var reactContext: ReactContext? = null
+  }
 
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
         object : DefaultReactNativeHost(this) {
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages
-            // Packages that cannot be autolinked yet can be added manually here, for example:
-            // packages.add(new MyReactNativePackage());
+            // Packages that cannot be autolinked yet can be added manually here.
             return packages
           }
 
@@ -47,6 +53,14 @@ class MainApplication : Application(), ReactApplication {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
     }
+
+    // Listen for the ReactContext to be created.
+    reactNativeHost.reactInstanceManager.addReactInstanceEventListener(object : ReactInstanceEventListener {
+        override fun onReactContextInitialized(reactContext: ReactContext) {
+            MainApplication.reactContext = reactContext
+        }
+    })
+
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
   }
 

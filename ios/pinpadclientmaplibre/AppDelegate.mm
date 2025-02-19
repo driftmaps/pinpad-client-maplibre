@@ -1,7 +1,8 @@
 #import "AppDelegate.h"
-
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
+#import <React/RCTEventDispatcher.h>
+#import <React/RCTBridge.h>
 
 @implementation AppDelegate
 
@@ -30,15 +31,44 @@
 #endif
 }
 
-// Linking API
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
-  return [super application:application openURL:url options:options] || [RCTLinkingManager application:application openURL:url options:options];
+// Handle custom deep links via RCTLinkingManager and handle .drift files
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+  if ([[url pathExtension].lowercaseString isEqualToString:@"drift"]) {
+    // Attempt to get the existing RN bridge from the rootViewController.
+    // If your project is structured differently, adjust accordingly.
+    UIWindow *window = self.window;
+    UIViewController *rootVC = window.rootViewController;
+    if ([rootVC respondsToSelector:@selector(bridge)]) {
+      RCTBridge *bridge = [rootVC valueForKey:@"bridge"];
+      if (bridge) {
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        [bridge.eventDispatcher sendAppEventWithName:@"DriftFileOpened"
+                                                body:@{ @"filePath": url.absoluteString }];
+        #pragma clang diagnostic pop
+        NSLog(@"Received .drift file: %@", url.absoluteString);
+        return YES; // Mark it handled
+      }
+    }
+    // If the bridge isn't ready, you could store `url` for later.
+  }
+
+  // 2) Otherwise, fall back to the normal Expo Linking flow:
+  BOOL handledBySuper = [super application:application openURL:url options:options];
+  BOOL handledByLinkingManager = [RCTLinkingManager application:application openURL:url options:options];
+  return handledBySuper || handledByLinkingManager;
 }
 
 // Universal Links
 - (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
-  BOOL result = [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
-  return [super application:application continueUserActivity:userActivity restorationHandler:restorationHandler] || result;
+  BOOL linkingManagerHandled = [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
+  BOOL superHandled = [super application:application
+                     continueUserActivity:userActivity
+                         restorationHandler:restorationHandler];
+  return superHandled || linkingManagerHandled;
 }
 
 // Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
