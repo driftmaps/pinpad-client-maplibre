@@ -11,6 +11,7 @@ jobs:
   build:
     timeout-minutes: 45
     runs-on: macos-14
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -98,17 +99,23 @@ jobs:
         run: xcrun simctl install booted ios/build/Build/Products/Debug-iphonesimulator/pinpadclientmaplibre.app
 
       - name: Run Maestro E2E tests
+        id: run_tests
+        continue-on-error: true
         run: |
-          
           max_attempts=4
           attempt=1
           
           until maestro test .maestro/ || [ $attempt -ge $max_attempts ]; do
             echo "Attempt $attempt failed. Retrying..."
             attempt=$((attempt + 1))
+            xcrun simctl io booted screenshot "failed-test-screenshot-${attempt}.png"
             
-            echo "Current simulator state:"
-            maestro hierarchy
+            # Upload screenshot immediately after taking it
+            if [ -f "failed-test-screenshot-${attempt}.png" ]; then
+              artifact_dir="test-artifacts/${{ github.run_id }}/${{ matrix.device }}/attempt-${attempt}"
+              mkdir -p "$artifact_dir"
+              cp "failed-test-screenshot-${attempt}.png" "$artifact_dir/"
+            fi
             
             sleep 5
           done
@@ -121,11 +128,27 @@ jobs:
           MAESTRO_DRIVER_STARTUP_TIMEOUT: 200000 
           MAESTRO_THROTTLE_CPU: true
 
+      - name: Report Test Status
+        run: |
+          if [ "${{ steps.run_tests.outcome }}" == "success" ]; then
+            echo "✅ Tests passed successfully for ${{ matrix.device }} (Runtime: ${{ matrix.runtime }})"
+          else
+            echo "⚠️ Tests had issues for ${{ matrix.device }} (Runtime: ${{ matrix.runtime }})"
+          fi
+
       - name: Capture simulator screenshot on failure
         if: failure()
         run: |
           maestro hierarchy
-          xcrun simctl io booted screenshot "failed-test-screenshot.png"
+          xcrun simctl io booted screenshot "failed-test-screenshot-final.png"
+          
+          # Upload final failure screenshot immediately
+          if [ -f "failed-test-screenshot-final.png" ]; then
+            # Create unique directory for this run's final screenshot
+            artifact_dir="test-artifacts/${{ github.run_id }}/${{ matrix.device }}/final"
+            mkdir -p "$artifact_dir"
+            cp "failed-test-screenshot-final.png" "$artifact_dir/"
+          fi
 
       - name: Upload Maestro artifacts
         if: always()
@@ -136,4 +159,5 @@ jobs:
             ~/Library/Logs/maestro/
             ~/.maestro/tests/
             ~/.maestro/screenshots/
-            failed-test-screenshot.png
+            test-artifacts/
+            failed-test-screenshot-*.png

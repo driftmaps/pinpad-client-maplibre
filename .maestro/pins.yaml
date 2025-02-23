@@ -1,0 +1,40 @@
+appId: com.anonymous.pinpadclientmaplibre
+---
+- launchApp
+- assertVisible:
+    id: "map-view"
+- tapOn:
+    point: "50%,50%"
+- assertVisible: "📍"
+- tapOn: emoji-1F607
+- assertVisible:
+    id: "pin-pending-pin"
+- assertVisible: "😇"
+- tapOn:
+    id: "message-input"
+- inputText: "Hello World"
+- hideKeyboard
+- tapOn:
+    id: "submit-button"
+- tapOn: "😇"
+- extendedWaitUntil:
+    visible: "Hello World"
+    timeout: 50000
+- tapOn:
+    id: "close-button"
+- tapOn:
+    id: "map-view"
+- tapOn:
+    id: "map-view"
+- tapOn:
+    id: "cancel-button"
+- assertNotVisible: "📍"
+- swipe:
+    start: "68%,10%"
+    end: "64%,71%"
+    duration: 1198
+- tapOn: "😇"
+- tapOn:
+    id: "delete-button"
+- assertNotVisible: "😇"
+
