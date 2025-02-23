@@ -51,6 +51,9 @@ export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect, onMessageCh
           onChangeText={handleMessageChange}
           placeholder="Enter your message"
           testID="message-input"
+          autoCorrect={false}
+          autoCapitalize="none"
+          autoComplete="off"
         />
         <View style={styles.buttonContainer}>
           <TouchableOpacity

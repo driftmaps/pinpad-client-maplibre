@@ -28,29 +28,6 @@ export class TileManager {
       this.tilesPath = `${this.dataPath}/data`;
       this.stylePath = `${this.dataPath}/style.json`;
 
-      if (await FileSystem.exists(this.stylePath)) {
-        const styleContent = await FileSystem.readFile(this.stylePath);
-        const style = JSON.parse(styleContent);
-
-        // This code adds the tiles to the sources definition
-        // This approach suggests that we are going to limit the view
-        // to the tiles that we have at the point of interaction
-        // This may prove to be annoying for us and we may need
-        // to somehow intercept the request event
-        // but this is fine for now
-        // TODO: determine whether this is acceptable once we start
-        // using non-streaming approach
-        style.sources = {
-          "custom-tiles": {
-            "type": "vector",
-            "tiles": [`file://${this.tilesPath}/{z}/{x}/{y}.pbf`],
-            "maxzoom": 14
-          }
-        };
-
-        await FileSystem.writeFile(this.stylePath, JSON.stringify(style, null, 2));
-      }
-
       this.initialized = true;
     } catch (error: any) {
       console.error('TileManager initialization error:', error);
