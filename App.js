@@ -1,28 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Text, Linking } from 'react-native';
-import MapLibreGL from '@maplibre/maplibre-react-native';
-import * as FileSystem from 'expo-file-system';
-import { useTileManager } from './hooks/useTileManager';
-import { AppRegistry } from 'react-native';
-import { name as appName } from './app.json';
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  Text,
+  Linking,
+} from "react-native";
+import MapLibreGL from "@maplibre/maplibre-react-native";
+import * as FileSystem from "expo-file-system";
+import { useTileManager } from "./hooks/useTileManager";
+import { AppRegistry } from "react-native";
+import { name as appName } from "./app.json";
 
 // Helper: download a file from a content URI to a local path.
 async function resolveContentUri(contentUri) {
-  const destPath = FileSystem.cacheDirectory + 'downloaded.drift';
+  const destPath = FileSystem.cacheDirectory + "downloaded.drift";
   try {
-    if (contentUri.startsWith('content://')) {
+    if (contentUri.startsWith("content://")) {
       // Use copyAsync for content URIs.
       await FileSystem.copyAsync({ from: contentUri, to: destPath });
-      console.log('File copied to', destPath);
+      console.log("File copied to", destPath);
       return destPath;
     } else {
       // For http/https URIs, use downloadAsync.
       const result = await FileSystem.downloadAsync(contentUri, destPath);
-      console.log('File downloaded to', result.uri);
+      console.log("File downloaded to", result.uri);
       return result.uri;
     }
   } catch (error) {
-    console.error('Failed to resolve content URI:', error);
+    console.error("Failed to resolve content URI:", error);
+    return null;
+  }
+}
+
+async function copyFileToLocal(fileUrl) {
+  const localPath =
+    FileSystem.cacheDirectory + "temp_" + new Date().getTime() + ".drift";
+  try {
+    await FileSystem.copyAsync({ from: fileUrl, to: localPath });
+    console.log("Copied file to", localPath);
+    return localPath;
+  } catch (error) {
+    console.error("Failed to copy file from Inbox:", error);
     return null;
   }
 }
@@ -35,29 +54,43 @@ export default function App() {
 
   // Process a drift file URL.
   const handleDriftUrl = async (url) => {
-    console.log('Drift file URL detected:', url);
-    
+    console.log("Drift file URL detected:", url);
+
     // Skip expo development client URLs.
-    if (url.startsWith('exp+pinpad-client-maplibre://')) {
-      console.log('Ignoring development URL:', url);
+    if (url.startsWith("exp+pinpad-client-maplibre://")) {
+      console.log("Ignoring development URL:", url);
       return;
     }
-    
+
     let localPath = url;
-    if (url.startsWith('content://')) {
-      console.log("DETECTED FILE");
+
+    // Resolve content URIs.
+    if (url.startsWith("content://")) {
+      console.log("DETECTED FILE (content URI)");
       localPath = await resolveContentUri(url);
       if (!localPath) {
         console.error("Failed to resolve content URI.");
         return;
       }
     }
-    
+
+    // If the file is in the Inbox folder, copy it to a temporary accessible location.
+    if (localPath.includes("/Inbox/")) {
+      console.log("File is in Inbox, copying to accessible location...");
+      const newLocalPath = await copyFileToLocal(localPath);
+      if (!newLocalPath) {
+        console.error("Failed to copy file from Inbox.");
+        return;
+      }
+      localPath = newLocalPath;
+    }
+
+    // Process the drift file.
     await tileManager.processDriftFile(localPath);
+
     try {
       const baseStyleUrl = tileManager.getStyleUrl();
-      // Instead of appending a query param to styleURL,
-      // update a separate version (to be used as the key)
+      // Update a separate version (to be used as the key)
       const version = new Date().getTime();
       setStyleUrl({ base: baseStyleUrl, version });
     } catch (err) {
@@ -67,20 +100,22 @@ export default function App() {
 
   // Process the initial URL at launch.
   useEffect(() => {
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        console.log('Initial URL detected:', url);
-        handleDriftUrl(url);
-      }
-    }).catch(err => {
-      console.log('Error getting initial URL', err);
-    });
+    Linking.getInitialURL()
+      .then((url) => {
+        if (url) {
+          console.log("Initial URL detected:", url);
+          handleDriftUrl(url);
+        }
+      })
+      .catch((err) => {
+        console.log("Error getting initial URL", err);
+      });
   }, [tileManager]);
 
   // Listen for URL events while the app is running.
   useEffect(() => {
-    const subscription = Linking.addEventListener('url', (event) => {
-      console.log('URL event received:', event.url);
+    const subscription = Linking.addEventListener("url", (event) => {
+      console.log("URL event received:", event.url);
       handleDriftUrl(event.url);
     });
     return () => {
