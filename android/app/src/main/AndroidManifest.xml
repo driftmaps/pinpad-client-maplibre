@@ -26,6 +26,14 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
         <data android:scheme="com.anonymous.pinpadclientmaplibre"/>
+        <data android:scheme="exp+pinpad-client-maplibre"/>
+      </intent-filter>
+      <intent-filter data-generated="true">
+        <action android:name="android.intent.action.VIEW"/>
+        <data android:mimeType="*/*" android:scheme="file" android:pathPattern=".*\.drift"/>
+        <data android:mimeType="*/*" android:scheme="content" android:pathPattern=".*\.drift"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <category android:name="android.intent.category.DEFAULT"/>
       </intent-filter>
     </activity>
   </application>
