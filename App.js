@@ -8,7 +8,6 @@ import {
   Platform,
 } from "react-native";
 import MapLibreGL from "@maplibre/maplibre-react-native";
-import * as FileSystem from "expo-file-system";
 import { useTileManager } from "./hooks/useTileManager";
 
 export default function App() {

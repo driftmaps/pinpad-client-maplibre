@@ -1,7 +1,6 @@
-import * as FileSystem from '@dr.pogodin/react-native-fs';
 import {Asset} from 'expo-asset';
 import {unzip} from 'react-native-zip-archive';
-import * as ExpoFileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 
 export class TileManager {
   private initialized = false;
@@ -26,7 +25,6 @@ export class TileManager {
   }
 
   async handleDriftUrl(url: string): Promise<void> {
-    console.log("Drift file URL detected:", url);
 
     // Skip expo development client URLs
     if (url.startsWith("exp+pinpad-client-maplibre://")) {
@@ -34,35 +32,38 @@ export class TileManager {
     }
 
     try {
-      const localPath = ExpoFileSystem.cacheDirectory + "downloaded.drift";
-      console.log(`localPath is ${localPath}`);
-      await ExpoFileSystem.copyAsync({ from: url, to: localPath });
+      const localPath = FileSystem.cacheDirectory + "downloaded.drift";
+      await FileSystem.copyAsync({ from: url, to: localPath });
       await this.processDriftFile(localPath);
     } catch (error) {
-      console.error("Failed to process drift file:", error);
       throw error;
     }
   }
 
   async processDriftFile(filePath: string): Promise<void> {
     try {
-      const extractionPath = `${FileSystem.DocumentDirectoryPath}`;
+      const extractionPath = `${FileSystem.documentDirectory}pinpad_tiles`;
 
       // Currently we are forcing a clean up
       // in real world we would be keeping caches
-      if (await FileSystem.exists(extractionPath)) {
-        await FileSystem.unlink(extractionPath);
+      const dirInfo = await FileSystem.getInfoAsync(extractionPath);
+      if (dirInfo.exists) {
+        await FileSystem.deleteAsync(extractionPath, { idempotent: true });
       }
-      await FileSystem.mkdir(extractionPath);
+      await FileSystem.makeDirectoryAsync(extractionPath, { intermediates: true });
 
       await unzip(filePath, extractionPath);
 
       this.dataPath = `${extractionPath}/tiles`;
       this.tilesPath = `${this.dataPath}/data`;
       this.stylePath = `${this.dataPath}/style.json`;
+      
 
-      if (await FileSystem.exists(this.stylePath)) {
-        const styleContent = await FileSystem.readFile(this.stylePath);
+      const styleInfo = await FileSystem.getInfoAsync(this.stylePath);
+      
+      if (styleInfo.exists) {
+        const styleContent = await FileSystem.readAsStringAsync(this.stylePath);
+        
         const style = JSON.parse(styleContent);
 
         if (style.metadata && style.metadata.centerCoordinate) {
@@ -74,15 +75,16 @@ export class TileManager {
         style.sources = {
           'custom-tiles': {
             'type': 'vector',
-            'tiles': [`file://${this.tilesPath}/{z}/{x}/{y}.pbf`],
+            'tiles': [`${this.tilesPath}/{z}/{x}/{y}.pbf`],
             'zoomlevel': 9,
             'maxzoom': 14,
             'minzoom': 5
           }
         };
 
-        await FileSystem.writeFile(
+        await FileSystem.writeAsStringAsync(
             this.stylePath, JSON.stringify(style, null, 2));
+            
       } else {
         console.error('Style file does not exist at', this.stylePath);
         throw new Error('Style file does not exist');
@@ -97,7 +99,8 @@ export class TileManager {
     if (!this.initialized || !this.stylePath) {
       throw new Error('TileManager not initialized or no stylePath');
     }
-    return `file://${this.stylePath}`;
+    const styleUrl = `${this.stylePath}`;
+    return styleUrl;
   }
 
   getTilePath(): string {
@@ -111,7 +114,6 @@ export class TileManager {
     if (!this.initialized || !this.centerCoordinate) {
       throw new Error('TileManager not initialized or center coordinate not set');
     }
-    console.log('center coordinate:', this.centerCoordinate);
     return this.centerCoordinate;
   }
 }
