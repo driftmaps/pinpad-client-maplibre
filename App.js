@@ -27,7 +27,6 @@ export default function App() {
       console.log("Skipping URL handling while TileManager is initializing");
       return;
     }
-    console.log("URL detected:", url);
     try {
       await tileManager.handleDriftUrl(url);
       updateStyleUrl();
