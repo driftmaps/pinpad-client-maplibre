@@ -5,43 +5,20 @@ import {
   ActivityIndicator,
   Text,
   Linking,
+  Platform,
 } from "react-native";
 import MapLibreGL from "@maplibre/maplibre-react-native";
 import * as FileSystem from "expo-file-system";
 import { useTileManager } from "./hooks/useTileManager";
-import { AppRegistry } from "react-native";
-import { name as appName } from "./app.json";
 
-// Helper: download a file from a content URI to a local path.
-async function resolveContentUri(contentUri) {
-  const destPath = FileSystem.cacheDirectory + "downloaded.drift";
+async function copyToCache(fileUrl) {
   try {
-    if (contentUri.startsWith("content://")) {
-      // Use copyAsync for content URIs.
-      await FileSystem.copyAsync({ from: contentUri, to: destPath });
-      console.log("File copied to", destPath);
-      return destPath;
-    } else {
-      // For http/https URIs, use downloadAsync.
-      const result = await FileSystem.downloadAsync(contentUri, destPath);
-      console.log("File downloaded to", result.uri);
-      return result.uri;
-    }
-  } catch (error) {
-    console.error("Failed to resolve content URI:", error);
-    return null;
-  }
-}
-
-async function copyFileToLocal(fileUrl) {
-  const localPath =
-    FileSystem.cacheDirectory + "temp_" + new Date().getTime() + ".drift";
-  try {
+    const localPath = FileSystem.cacheDirectory + "downloaded.drift";
+    console.log(`localPath is ${localPath}`);
     await FileSystem.copyAsync({ from: fileUrl, to: localPath });
-    console.log("Copied file to", localPath);
     return localPath;
   } catch (error) {
-    console.error("Failed to copy file from Inbox:", error);
+    console.error("Failed to pull file into app cache: ", error);
     return null;
   }
 }
@@ -62,27 +39,11 @@ export default function App() {
       return;
     }
 
-    let localPath = url;
+    let localPath = await copyToCache(url);
 
-    // Resolve content URIs.
-    if (url.startsWith("content://")) {
-      console.log("DETECTED FILE (content URI)");
-      localPath = await resolveContentUri(url);
-      if (!localPath) {
-        console.error("Failed to resolve content URI.");
-        return;
-      }
-    }
-
-    // If the file is in the Inbox folder, copy it to a temporary accessible location.
-    if (localPath.includes("/Inbox/")) {
-      console.log("File is in Inbox, copying to accessible location...");
-      const newLocalPath = await copyFileToLocal(localPath);
-      if (!newLocalPath) {
-        console.error("Failed to copy file from Inbox.");
-        return;
-      }
-      localPath = newLocalPath;
+    if (!localPath) {
+      console.error("Failed to get local file path.");
+      return;
     }
 
     // Process the drift file.
