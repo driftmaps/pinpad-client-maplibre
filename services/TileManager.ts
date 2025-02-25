@@ -11,7 +11,6 @@ export class TileManager {
   private centerCoordinate: [number, number] | null = null;
 
   async initialize(): Promise<void> {
-    // console.log('initialize called');
     if (this.initialized) return;
 
     try {
@@ -45,11 +44,9 @@ export class TileManager {
         // If you decide to package the centerCoordinate in the style file, you might add a metadata property:
         // Example: { "metadata": { "centerCoordinate": [-84.3837773, 33.7521521] } }
         if (style.metadata && style.metadata.centerCoordinate) {
-          console.log('center coordinate set from metadata');
           this.centerCoordinate = style.metadata.centerCoordinate;
         } else {
           // Set a default if not provided.
-          console.log('center coordinate set from default');
           this.centerCoordinate = [-73.72826520392081, 45.584043985983];
         }
 
@@ -89,7 +86,6 @@ export class TileManager {
 
     // Skip expo development client URLs
     if (url.startsWith("exp+pinpad-client-maplibre://")) {
-      console.log("Ignoring development URL:", url);
       return;
     }
 
