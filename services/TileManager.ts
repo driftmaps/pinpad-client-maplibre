@@ -1,6 +1,7 @@
 import * as FileSystem from '@dr.pogodin/react-native-fs';
 import {Asset} from 'expo-asset';
 import {unzip} from 'react-native-zip-archive';
+import * as ExpoFileSystem from 'expo-file-system';
 
 export class TileManager {
   private initialized = false;
@@ -83,6 +84,28 @@ export class TileManager {
     }
   }
 
+  async handleDriftUrl(url: string): Promise<void> {
+    console.log("Drift file URL detected:", url);
+
+    // Skip expo development client URLs
+    if (url.startsWith("exp+pinpad-client-maplibre://")) {
+      console.log("Ignoring development URL:", url);
+      return;
+    }
+
+    try {
+      const localPath = ExpoFileSystem.cacheDirectory + "downloaded.drift";
+      console.log(`localPath is ${localPath}`);
+      await ExpoFileSystem.copyAsync({ from: url, to: localPath });
+
+      // Process the drift file
+      await this.processDriftFile(localPath);
+    } catch (error) {
+      console.error("Failed to process drift file:", error);
+      throw error; // Re-throw to allow handling by caller
+    }
+  }
+
   async processDriftFile(filePath: string): Promise<void> {
     console.log('processDriftFile called');
     try {
@@ -135,8 +158,8 @@ export class TileManager {
             this.stylePath, JSON.stringify(style, null, 2));
       } else {
         console.error('Style file does not exist at', this.stylePath);
+        throw new Error('Style file does not exist');
       }
-      // this.initialized = true;
     } catch (error: any) {
       console.error('TileManager initialization error:', error);
       throw new Error(`Failed to initialize TileManager: ${error.message}`);
@@ -145,19 +168,19 @@ export class TileManager {
 
   getStyleUrl(): string {
     if (!this.initialized || !this.stylePath) {
-      throw new Error('TileManager not initialized');
+      throw new Error('TileManager not initialized or no stylePath');
     }
     return `file://${this.stylePath}`;
   }
 
   getTilePath(): string {
     if (!this.initialized || !this.tilesPath) {
-      throw new Error('TileManager not initialized');
+      throw new Error('TileManager not initialized or no tilesPath');
     }
     return this.tilesPath;
   }
 
-  public getCenterCoordinate(): number[] {
+  public getCenter(): number[] {
     if (!this.initialized || !this.centerCoordinate) {
       throw new Error('TileManager not initialized or center coordinate not set');
     }

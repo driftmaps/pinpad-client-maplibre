@@ -11,70 +11,40 @@ import MapLibreGL from "@maplibre/maplibre-react-native";
 import * as FileSystem from "expo-file-system";
 import { useTileManager } from "./hooks/useTileManager";
 
-
-// Combined and moved outside App()
-async function handleDriftUrl(url, tileManager, setStyleUrl) {
-  console.log("Drift file URL detected:", url);
-
-  // Skip expo development client URLs
-  if (url.startsWith("exp+pinpad-client-maplibre://")) {
-    console.log("Ignoring development URL:", url);
-    return;
-  }
-
-  try {
-    const localPath = FileSystem.cacheDirectory + "downloaded.drift";
-    console.log(`localPath is ${localPath}`);
-    await FileSystem.copyAsync({ from: url, to: localPath });
-
-    // Process the drift file
-    await tileManager.processDriftFile(localPath);
-
-    const baseStyleUrl = tileManager.getStyleUrl();
-    // Update a separate version (to be used as the key)
-    const version = new Date().getTime();
-    setStyleUrl({ base: baseStyleUrl, version });
-  } catch (error) {
-    console.error("Failed to process drift file:", error);
-  }
-}
-
 export default function App() {
   const { tileManager, isLoading, error } = useTileManager();
   const [styleUrl, setStyleUrl] = useState(null);
 
-  console.log("calling App");
+  const updateStyleUrl = () => {
+    const baseStyleUrl = tileManager.getStyleUrl();
+    const version = new Date().getTime();
+    setStyleUrl({ base: baseStyleUrl, version });
+  };
 
-  // Update useEffect to use the moved handleDriftUrl
-  useEffect(() => {
-    Linking.getInitialURL()
-      .then((url) => {
-        if (url) {
-          console.log("Initial URL detected:", url);
-          handleDriftUrl(url, tileManager, setStyleUrl);
-        }
-      })
-      .catch((err) => {
-        console.log("Error getting initial URL", err);
-      });
-  }, [tileManager]);
-
-  useEffect(() => {
-    const subscription = Linking.addEventListener("url", (event) => {
-      console.log("URL event received:", event.url);
-      handleDriftUrl(event.url, tileManager, setStyleUrl);
-    });
-    return () => {
-      subscription.remove();
-    };
-  }, [tileManager]);
-
-  useEffect(() => {
-    if (global.HermesInternal) {
-      console.log("Hermes is enabled.");
-    } else {
-      console.log("Hermes is not enabled.");
+  const handleUrl = async (url) => {
+    if (!url) return;
+    if (isLoading) {
+      console.log("Skipping URL handling while TileManager is initializing");
+      return;
     }
+    console.log("URL detected:", url);
+    try {
+      await tileManager.handleDriftUrl(url);
+      updateStyleUrl();
+    } catch (err) {
+      console.error("Error handling URL:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoading) {  // Only set up URL handling after TileManager is ready
+      Linking.getInitialURL().then(handleUrl);
+      const subscription = Linking.addEventListener("url", (event) => handleUrl(event.url));
+      return () => subscription.remove();
+    }
+  }, [isLoading, tileManager]);
+
+  useEffect(() => {
     MapLibreGL.setAccessToken(null);
   }, []);
 
@@ -98,7 +68,7 @@ export default function App() {
       >
         <MapLibreGL.Camera
           zoomLevel={9}
-          centerCoordinate={tileManager.getCenterCoordinate()} // now uses the packaged center
+          centerCoordinate={tileManager.getCenter()} // now uses the packaged center
           minZoomLevel={5}
           maxZoomLevel={14}
         />
