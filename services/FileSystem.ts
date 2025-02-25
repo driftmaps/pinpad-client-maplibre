@@ -1,24 +1,33 @@
-import * as RNFS from '@dr.pogodin/react-native-fs';
+import * as FileSystem from 'expo-file-system';
 import { unzip } from 'react-native-zip-archive';
-import { Platform } from 'react-native';
+import { Asset } from 'expo-asset';
 
 // Note: This is a temporary sketch and these aren't being used currently
 // TODO: Replace
 export class FileSystemService {
   // TODO: Generalize these methods
   async extractTileBundle(bundleName: string, extractionPath: string): Promise<string> {
-    const zipDestination = `${RNFS.DocumentDirectoryPath}/${bundleName}`;
+    const zipDestination = `${FileSystem.documentDirectory}${bundleName}`;
 
-    if (await RNFS.exists(zipDestination)) {
-      await RNFS.unlink(zipDestination);
-      await RNFS.unlink(extractionPath);
+    const destinationInfo = await FileSystem.getInfoAsync(zipDestination);
+    const extractionInfo = await FileSystem.getInfoAsync(extractionPath);
+    
+    if (destinationInfo.exists) {
+      await FileSystem.deleteAsync(zipDestination, { idempotent: true });
+    }
+    if (extractionInfo.exists) {
+      await FileSystem.deleteAsync(extractionPath, { idempotent: true });
     }
 
-    if (Platform.OS === 'android') {
-      await RNFS.copyFileAssets(bundleName, zipDestination);
+    // Load the asset using Expo's Asset system
+    const asset = await Asset.loadAsync(bundleName);
+    if (asset && asset[0]) {
+      await FileSystem.copyAsync({
+        from: asset[0].localUri!,
+        to: zipDestination
+      });
     } else {
-      const assetPath = `${RNFS.MainBundlePath}/${bundleName}`;
-      await RNFS.copyFile(assetPath, zipDestination);
+      throw new Error(`Failed to load asset: ${bundleName}`);
     }
 
     await unzip(zipDestination, extractionPath);
@@ -26,7 +35,8 @@ export class FileSystemService {
   }
 
   async getTile(tilePath: string): Promise<string> {
-    if (!(await RNFS.exists(tilePath))) {
+    const tileInfo = await FileSystem.getInfoAsync(tilePath);
+    if (!tileInfo.exists) {
       throw new Error(`Tile not found: ${tilePath}`);
     }
     return tilePath;
