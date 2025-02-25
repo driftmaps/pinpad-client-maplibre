@@ -11,15 +11,31 @@ import MapLibreGL from "@maplibre/maplibre-react-native";
 import * as FileSystem from "expo-file-system";
 import { useTileManager } from "./hooks/useTileManager";
 
-async function copyToCache(fileUrl) {
+
+// Combined and moved outside App()
+async function handleDriftUrl(url, tileManager, setStyleUrl) {
+  console.log("Drift file URL detected:", url);
+
+  // Skip expo development client URLs
+  if (url.startsWith("exp+pinpad-client-maplibre://")) {
+    console.log("Ignoring development URL:", url);
+    return;
+  }
+
   try {
     const localPath = FileSystem.cacheDirectory + "downloaded.drift";
     console.log(`localPath is ${localPath}`);
-    await FileSystem.copyAsync({ from: fileUrl, to: localPath });
-    return localPath;
+    await FileSystem.copyAsync({ from: url, to: localPath });
+
+    // Process the drift file
+    await tileManager.processDriftFile(localPath);
+
+    const baseStyleUrl = tileManager.getStyleUrl();
+    // Update a separate version (to be used as the key)
+    const version = new Date().getTime();
+    setStyleUrl({ base: baseStyleUrl, version });
   } catch (error) {
-    console.error("Failed to pull file into app cache: ", error);
-    return null;
+    console.error("Failed to process drift file:", error);
   }
 }
 
@@ -29,43 +45,13 @@ export default function App() {
 
   console.log("calling App");
 
-  // Process a drift file URL.
-  const handleDriftUrl = async (url) => {
-    console.log("Drift file URL detected:", url);
-
-    // Skip expo development client URLs.
-    if (url.startsWith("exp+pinpad-client-maplibre://")) {
-      console.log("Ignoring development URL:", url);
-      return;
-    }
-
-    let localPath = await copyToCache(url);
-
-    if (!localPath) {
-      console.error("Failed to get local file path.");
-      return;
-    }
-
-    // Process the drift file.
-    await tileManager.processDriftFile(localPath);
-
-    try {
-      const baseStyleUrl = tileManager.getStyleUrl();
-      // Update a separate version (to be used as the key)
-      const version = new Date().getTime();
-      setStyleUrl({ base: baseStyleUrl, version });
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Process the initial URL at launch.
+  // Update useEffect to use the moved handleDriftUrl
   useEffect(() => {
     Linking.getInitialURL()
       .then((url) => {
         if (url) {
           console.log("Initial URL detected:", url);
-          handleDriftUrl(url);
+          handleDriftUrl(url, tileManager, setStyleUrl);
         }
       })
       .catch((err) => {
@@ -73,11 +59,10 @@ export default function App() {
       });
   }, [tileManager]);
 
-  // Listen for URL events while the app is running.
   useEffect(() => {
     const subscription = Linking.addEventListener("url", (event) => {
       console.log("URL event received:", event.url);
-      handleDriftUrl(event.url);
+      handleDriftUrl(event.url, tileManager, setStyleUrl);
     });
     return () => {
       subscription.remove();
