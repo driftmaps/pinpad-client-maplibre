@@ -1,3 +1,4 @@
+// Main Android activity that handles the React Native app and .drift file intents
 package com.anonymous.pinpadclientmaplibre
 import expo.modules.splashscreen.SplashScreenManager
 
@@ -8,15 +9,15 @@ import com.facebook.react.ReactActivity
 
 class MainActivity : ReactActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-    // Set the theme to AppTheme BEFORE onCreate to support
-    // coloring the background, status bar, and navigation bar.
-    // This is required for expo-splash-screen.
-    // setTheme(R.style.AppTheme);
-    // @generated begin expo-splashscreen - expo prebuild (DO NOT MODIFY) sync-f3ff59a738c56c9a6119210cb55f0b613eb8b6af
-    SplashScreenManager.registerOnActivity(this)
-    // @generated end expo-splashscreen
+        // Set the theme to AppTheme BEFORE onCreate to support
+        // coloring the background, status bar, and navigation bar.
+        // This is required for expo-splash-screen.
+        // setTheme(R.style.AppTheme);
+        // @generated begin expo-splashscreen - expo prebuild (DO NOT MODIFY) sync-f3ff59a738c56c9a6119210cb55f0b613eb8b6af
+        SplashScreenManager.registerOnActivity(this)
+        // @generated end expo-splashscreen
         super.onCreate(null)
-        // Handle file intent on app start.
+        // Process any .drift file that triggered app launch
         handleFileIntent(intent)
     }
 
@@ -31,6 +32,8 @@ class MainActivity : ReactActivity() {
         intent?.let { handleFileIntent(it) }
     }
 
+    // Process intents for .drift files and send events to React Native
+    // The file URI can be either a content:// or file:/// URI
     private fun handleFileIntent(intent: Intent) {
         if (intent.action == Intent.ACTION_VIEW) {
             val uri: Uri? = intent.data

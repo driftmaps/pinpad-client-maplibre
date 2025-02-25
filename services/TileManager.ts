@@ -1,21 +1,25 @@
 import {Asset} from 'expo-asset';
-import {unzip} from 'react-native-zip-archive';
 import * as FileSystem from 'expo-file-system';
+import {unzip} from 'react-native-zip-archive';
 
+// TileManager handles the loading, extraction, and management of map tile data
+// from .drift files
 export class TileManager {
   private initialized = false;
   private dataPath: string|null = null;
   private stylePath: string|null = null;
   private tilesPath: string|null = null;
-  private centerCoordinate: [number, number] | null = null;
+  private centerCoordinate: [number, number]|null = null;
 
+  // Initialize TileManager by loading and processing the default .drift file
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
     try {
+      // Load the bundled test.drift file using Expo's Asset system
       const asset = await Asset.fromModule(require('../assets/test.drift'))
                         .downloadAsync();
-      
+
       await this.processDriftFile(asset.localUri!);
       this.initialized = true;
     } catch (error: any) {
@@ -24,54 +28,59 @@ export class TileManager {
     }
   }
 
-  async handleDriftUrl(url: string): Promise<void> {
-
-    // Skip expo development client URLs
-    if (url.startsWith("exp+pinpad-client-maplibre://")) {
+  // Handle incoming .drift files from URIs (e.g., from deep links or file
+  // system)
+  async handleDriftUri(uri: string): Promise<void> {
+    // Skip Expo development client URIs to avoid conflicts
+    if (uri.startsWith('exp+pinpad-client-maplibre://')) {
       return;
     }
 
     try {
-      const localPath = FileSystem.cacheDirectory + "downloaded.drift";
-      await FileSystem.copyAsync({ from: url, to: localPath });
+      const localPath = FileSystem.cacheDirectory + 'downloaded.drift';
+      await FileSystem.copyAsync({from: uri, to: localPath});
       await this.processDriftFile(localPath);
     } catch (error) {
       throw error;
     }
   }
 
+  // Process a .drift file: extract it and set up the tile structure
   async processDriftFile(filePath: string): Promise<void> {
     try {
       const extractionPath = `${FileSystem.documentDirectory}pinpad_tiles`;
 
-      // Currently we are forcing a clean up
-      // in real world we would be keeping caches
+      // Clean up existing tiles (in production, would implement caching)
       const dirInfo = await FileSystem.getInfoAsync(extractionPath);
       if (dirInfo.exists) {
-        await FileSystem.deleteAsync(extractionPath, { idempotent: true });
+        await FileSystem.deleteAsync(extractionPath, {idempotent: true});
       }
-      await FileSystem.makeDirectoryAsync(extractionPath, { intermediates: true });
+      await FileSystem.makeDirectoryAsync(
+          extractionPath, {intermediates: true});
 
+      // Extract the .drift file
       await unzip(filePath, extractionPath);
 
+      // Set up paths for the extracted data
       this.dataPath = `${extractionPath}/tiles`;
       this.tilesPath = `${this.dataPath}/data`;
       this.stylePath = `${this.dataPath}/style.json`;
-      
 
+      // Process the style file
       const styleInfo = await FileSystem.getInfoAsync(this.stylePath);
-      
+
       if (styleInfo.exists) {
         const styleContent = await FileSystem.readAsStringAsync(this.stylePath);
-        
+
         const style = JSON.parse(styleContent);
 
+        // Get center coordinates from metadata or use default
         if (style.metadata && style.metadata.centerCoordinate) {
           this.centerCoordinate = style.metadata.centerCoordinate;
-        } else {
-          this.centerCoordinate = [-73.72826520392081, 45.584043985983];
+          console.log('setting centerCoordinate to [lon, lat] = ', this.centerCoordinate);
         }
 
+        // Configure the tile source
         style.sources = {
           'custom-tiles': {
             'type': 'vector',
@@ -82,9 +91,10 @@ export class TileManager {
           }
         };
 
+        // Write back the modified style file
         await FileSystem.writeAsStringAsync(
             this.stylePath, JSON.stringify(style, null, 2));
-            
+
       } else {
         console.error('Style file does not exist at', this.stylePath);
         throw new Error('Style file does not exist');
@@ -95,12 +105,12 @@ export class TileManager {
     }
   }
 
-  getStyleUrl(): string {
+  // Get the URI for the current style file
+  getStyleUri(): string {
     if (!this.initialized || !this.stylePath) {
       throw new Error('TileManager not initialized or no stylePath');
     }
-    const styleUrl = `${this.stylePath}`;
-    return styleUrl;
+    return this.stylePath;
   }
 
   getTilePath(): string {
@@ -112,7 +122,8 @@ export class TileManager {
 
   public getCenter(): number[] {
     if (!this.initialized || !this.centerCoordinate) {
-      throw new Error('TileManager not initialized or center coordinate not set');
+      throw new Error(
+          'TileManager not initialized or center coordinate not set');
     }
     return this.centerCoordinate;
   }

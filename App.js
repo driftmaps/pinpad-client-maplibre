@@ -10,42 +10,53 @@ import {
 import MapLibreGL from "@maplibre/maplibre-react-native";
 import { useTileManager } from "./hooks/useTileManager";
 
+// Main App component that handles map display and URI-based tile loading
 export default function App() {
+  // TileManager handles loading and processing of map tile data
   const { tileManager, isLoading, error } = useTileManager();
-  const [styleUrl, setStyleUrl] = useState(null);
+  // styleUri state tracks the current map style and forces re-renders when needed
+  const [styleUri, setStyleUri] = useState(null);
 
-  const updateStyleUrl = () => {
-    const baseStyleUrl = tileManager.getStyleUrl();
+  // Updates the style URI with a version timestamp to force MapView to reload
+  const updateStyleUri = () => {
+    const baseStyleUri = tileManager.getStyleUri();
     const version = new Date().getTime();
-    setStyleUrl({ base: baseStyleUrl, version });
+    setStyleUri({ base: baseStyleUri, version });
   };
 
-  const handleUrl = async (url) => {
-    if (!url) return;
+  // Handles incoming .drift file URIs, processes them with TileManager
+  const handleUri = async (uri) => {
+    if (!uri) return;
     if (isLoading) {
-      console.log("Skipping URL handling while TileManager is initializing");
+      console.log("Skipping URI handling while TileManager is initializing");
       return;
     }
     try {
-      await tileManager.handleDriftUrl(url);
-      updateStyleUrl();
+      await tileManager.handleDriftUri(uri);
+      updateStyleUri();
     } catch (err) {
-      console.error("Error handling URL:", err);
+      console.error("Error handling URI:", err);
     }
   };
 
+  // Sets up URI handling for deep links and initial URIs
   useEffect(() => {
-    if (!isLoading) {  // Only set up URL handling after TileManager is ready
-      Linking.getInitialURL().then(handleUrl);
-      const subscription = Linking.addEventListener("url", (event) => handleUrl(event.url));
+    if (!isLoading) {
+      // Only set up URI handling after TileManager is ready
+      Linking.getInitialURL().then(handleUri);
+      const subscription = Linking.addEventListener("url", (event) =>
+        handleUri(event.url)
+      );
       return () => subscription.remove();
     }
   }, [isLoading, tileManager]);
 
+  // MapLibre initialization - no access token needed as we're using local tiles
   useEffect(() => {
     MapLibreGL.setAccessToken(null);
   }, []);
 
+  // Loading and error states
   if (isLoading) {
     return <ActivityIndicator />;
   }
@@ -56,17 +67,18 @@ export default function App() {
       </View>
     );
   }
+
   return (
     <View style={styles.container}>
       <MapLibreGL.MapView
-        key={styleUrl?.version} // <== Force mount when styleUrl changes.
+        key={styleUri?.version} // Forces remount when styleUri changes
         style={styles.map}
-        styleURL={styleUrl?.base || tileManager.getStyleUrl()}
+        styleURL={styleUri?.base || tileManager.getStyleUri()}
         testID="map-view"
       >
         <MapLibreGL.Camera
           zoomLevel={9}
-          centerCoordinate={tileManager.getCenter()} // now uses the packaged center
+          centerCoordinate={tileManager.getCenter()}
           minZoomLevel={5}
           maxZoomLevel={14}
         />

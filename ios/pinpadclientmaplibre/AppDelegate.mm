@@ -1,3 +1,4 @@
+// iOS App Delegate that handles React Native initialization and .drift file handling
 #import "AppDelegate.h"
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
@@ -6,6 +7,7 @@
 
 @implementation AppDelegate
 
+// Initialize the React Native app
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"main";
@@ -17,6 +19,7 @@
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
+// Configure the JavaScript bundle location
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
   return [self bundleURL];
@@ -31,11 +34,13 @@
 #endif
 }
 
-// Handle custom deep links via RCTLinkingManager and handle .drift files
+// Handle deep links and .drift file URIs
 - (BOOL)application:(UIApplication *)application
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
+  // Handle .drift files by sending events to React Native
+  // The file URI will be in the format file:///path/to/file.drift
   if ([[url pathExtension].lowercaseString isEqualToString:@"drift"]) {
     // Attempt to get the existing RN bridge from the rootViewController.
     // If your project is structured differently, adjust accordingly.
@@ -47,7 +52,7 @@
         #pragma clang diagnostic push
         #pragma clang diagnostic ignored "-Wdeprecated-declarations"
         [bridge.eventDispatcher sendAppEventWithName:@"DriftFileOpened"
-                                                body:@{ @"filePath": url.absoluteString }];
+                                              body:@{ @"filePath": url.absoluteString }];
         #pragma clang diagnostic pop
         NSLog(@"Received .drift file: %@", url.absoluteString);
         return YES; // Mark it handled
@@ -56,13 +61,13 @@
     // If the bridge isn't ready, you could store `url` for later.
   }
 
-  // 2) Otherwise, fall back to the normal Expo Linking flow:
+  // Handle standard deep link URIs via Expo's Linking system
   BOOL handledBySuper = [super application:application openURL:url options:options];
   BOOL handledByLinkingManager = [RCTLinkingManager application:application openURL:url options:options];
   return handledBySuper || handledByLinkingManager;
 }
 
-// Universal Links
+// Handle Universal Links
 - (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
   BOOL linkingManagerHandled = [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
   BOOL superHandled = [super application:application
@@ -71,19 +76,17 @@
   return superHandled || linkingManagerHandled;
 }
 
-// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
+// Remote notification handling methods required for compatibility
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
   return [super application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
 }
 
-// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
   return [super application:application didFailToRegisterForRemoteNotificationsWithError:error];
 }
 
-// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
   return [super application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
