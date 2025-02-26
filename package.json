@@ -11,7 +11,7 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "test:maestro": "maestro test tests/*.yaml",
+    "test:maestro": "maestro test .maestro/",
     "test:maestro:ios": "bash tests/test-ios.sh",
     "test:maestro:android": "bash tests/test-android.sh",
     "generate-test-data": "cd assets && zip -r test.drift tiles"
@@ -20,8 +20,10 @@
     "preset": "jest-expo"
   },
   "dependencies": {
-    "@maplibre/maplibre-react-native": "^10.0.0-alpha.26",
+    "@gorhom/bottom-sheet": "^5",
+    "@maplibre/maplibre-react-native": "^10.0.0",
     "@react-navigation/native": "^7.0.0",
+    "emoji-datasource": "^15.1.2",
     "expo": "~52.0.11",
     "expo-asset": "~11.0.1",
     "expo-blur": "~14.0.1",
@@ -38,6 +40,9 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.3",
+    "react-native-emoji-selector": "^0.2.0",
+    "react-native-gesture-handler": "~2.20.2",
+    "react-native-reanimated": "~3.16.1",
     "react-native-web": "~0.19.13",
     "react-native-zip-archive": "^7.0.1",
     "serve": "^14.2.4"

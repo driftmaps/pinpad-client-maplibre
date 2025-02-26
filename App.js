@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
-import MapLibreGL from "@maplibre/maplibre-react-native";
-import { useTileManager } from "./hooks/useTileManager";
+import { useMemo, useState, useRef, useCallback } from 'react';
+import { StyleSheet, View, ActivityIndicator, Text, InteractionManager } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useTileManager } from './hooks/useTileManager';
+import { usePinsState } from './hooks/usePinsState';
 import { listenForDriftFiles } from "./hooks/listenForDriftFiles";
+import { MapContainer } from './components/MapContainer';
+import { PinManagement } from './components/PinManagement';
 
 // Main App component that handles map display and URI-based tile loading
 export default function App() {
@@ -13,15 +16,113 @@ export default function App() {
   // set up handling of files evens via deep linking
   listenForDriftFiles(tileManager, isLoading, setStyleUri);
 
-  // MapLibre initialization - no access token needed as we're using local tiles
-  useEffect(() => {
-    MapLibreGL.setAccessToken(null);
-  }, []);
+  const {
+    pins,
+    setPendingPin,
+    clearPendingPin,
+    deletePin,
+    finalizePendingPin,
+    updatePendingPin
+  } = usePinsState();
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedPin, setSelectedPin] = useState(null);
 
-  // Loading and error states
-  if (isLoading) {
-    return <ActivityIndicator />;
-  }
+  const [initialCameraProps, setInitialCameraProps] = useState({
+    // Montreal coordinates
+    centerCoordinate: [-73.72826520392081, 45.584043985983],
+    zoomLevel: 10,
+  });
+
+  const isTransitioningRef = useRef(false);
+  
+  const handleMapPress = useCallback((event) => {
+    if (!event?.geometry?.coordinates || isTransitioningRef.current) return;
+    
+    isTransitioningRef.current = true;
+    const coordinates = {
+      longitude: event.geometry.coordinates[0],
+      latitude: event.geometry.coordinates[1]
+    };
+    
+    clearPendingPin();
+    setSelectedPin(null);
+    
+    setInitialCameraProps({
+      centerCoordinate: [coordinates.longitude, coordinates.latitude],
+      padding: { paddingBottom: 400 },
+      animationMode: 'easeTo',
+      animationDuration: 250
+    });
+    
+    setPendingPin(coordinates);
+    setSelectedLocation(coordinates);
+    
+    InteractionManager.runAfterInteractions(() => {
+      isTransitioningRef.current = false;
+    });
+  }, [setPendingPin, clearPendingPin]);
+  
+  const handleBottomSheetClose = useCallback(() => {
+    if (isTransitioningRef.current) return;
+    
+    isTransitioningRef.current = true;
+    
+    setSelectedLocation(null);
+    setSelectedPin(null);
+    
+    requestAnimationFrame(() => {
+      clearPendingPin();
+      isTransitioningRef.current = false;
+    });
+  }, [clearPendingPin]);
+
+  const handlePinPress = useCallback((pin) => {
+    if (!isTransitioningRef.current) {
+      isTransitioningRef.current = true;
+      
+      setInitialCameraProps({
+        centerCoordinate: [pin.coordinates.longitude, pin.coordinates.latitude],
+        padding: { paddingBottom: 400 },
+        animationMode: 'easeTo',
+        animationDuration: 250
+      });
+
+      setSelectedPin(pin);
+      setSelectedLocation(pin.coordinates);
+      clearPendingPin();
+      
+      InteractionManager.runAfterInteractions(() => {
+        isTransitioningRef.current = false;
+      });
+    }
+  }, [clearPendingPin]);
+
+  const handlePinDelete = useCallback((pin) => {
+    deletePin(pin);
+    handleBottomSheetClose();
+  }, [deletePin, handleBottomSheetClose]);
+
+  const handlePinCreate = useCallback((emoji, message) => {
+    finalizePendingPin({
+      emoji,
+      message,
+      coordinates: selectedLocation,
+      timestamp: Date.now()
+    });
+
+    requestAnimationFrame(() => {
+      setSelectedLocation(null);
+      setSelectedPin(null);
+      clearPendingPin();
+    });
+  }, [finalizePendingPin, selectedLocation, clearPendingPin]);
+
+  const visiblePins = useMemo(() => 
+    pins.filter(pin => pin && pin.coordinates), 
+    [pins]
+  );
+
+  if (isLoading) return <ActivityIndicator />;
   if (error) {
     return (
       <View style={styles.errorContainer}>
@@ -31,34 +132,42 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
-      <MapLibreGL.MapView
-        key={styleUri?.version} // Forces remount when styleUri changes
-        style={styles.map}
-        styleURL={styleUri?.base || tileManager.getStyleUri()}
-        testID="map-view"
-      >
-        <MapLibreGL.Camera
-          zoomLevel={9}
-          centerCoordinate={tileManager.getCenter()}
-          minZoomLevel={5}
-          maxZoomLevel={14}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <MapContainer
+          key={styleUri?.version} // Forces remount when styleUri changes
+          styleURL={styleUri?.base || tileManager.getStyleUri()}
+          pins={visiblePins}
+          onMapPress={handleMapPress}
+          onPinPress={handlePinPress}
+          onPinRemove={deletePin}
+          cameraProps={initialCameraProps}
         />
-      </MapLibreGL.MapView>
-    </View>
+        
+        <PinManagement
+          selectedLocation={selectedLocation}
+          selectedPin={selectedPin}
+          onClose={handleBottomSheetClose}
+          onPinCreate={handlePinCreate}
+          onPinDelete={handlePinDelete}
+          onUpdatePendingPin={updatePendingPin}
+        />
+      </View>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { flex: 1 },
+  container: {
+    flex: 1,
+  },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   errorText: {
-    color: "red",
+    color: 'red',
     fontSize: 16,
   },
 });
