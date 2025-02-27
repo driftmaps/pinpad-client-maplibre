@@ -21,30 +21,8 @@
         </array>
         <key>LSItemContentTypes</key>
         <array>
-          <string>com.example.drift</string>
+          <string>public.text</string>
         </array>
-      </dict>
-    </array>
-    <key>UTExportedTypeDeclarations</key>
-    <array>
-      <dict>
-        <key>UTTypeIdentifier</key>
-        <string>com.example.drift</string>
-        <key>UTTypeConformsTo</key>
-        <array>
-          <string>public.zip-archive</string>
-        </array>
-        <key>UTTypeDescription</key>
-        <string>Drift File Format</string>
-        <key>UTTypeTagSpecification</key>
-        <dict>
-          <key>public.filename-extension</key>
-          <array>
-            <string>drift</string>
-          </array>
-          <key>public.mime-type</key>
-          <string>application/zip</string>
-        </dict>
       </dict>
     </array>
     <key>CFBundleExecutable</key>
@@ -120,5 +98,27 @@
     <string>Automatic</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+      <dict>
+        <key>UTTypeIdentifier</key>
+        <string>com.example.drift</string>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.zip-archive</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>Drift File Format</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>drift</string>
+          </array>
+          <key>public.mime-type</key>
+          <string>application/zip</string>
+        </dict>
+      </dict>
+    </array>
   </dict>
 </plist>

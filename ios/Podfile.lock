@@ -6,7 +6,7 @@ PODS:
   - EXJSONUtils (0.14.0)
   - EXManifests (0.15.6):
     - ExpoModulesCore
-  - Expo (52.0.11):
+  - Expo (52.0.37):
     - ExpoModulesCore
   - expo-dev-client (5.0.12):
     - EXManifests
@@ -219,17 +219,17 @@ PODS:
     - ExpoModulesCore
   - ExpoBlur (14.0.1):
     - ExpoModulesCore
-  - ExpoFileSystem (18.0.4):
+  - ExpoFileSystem (18.0.11):
     - ExpoModulesCore
   - ExpoFont (13.0.1):
     - ExpoModulesCore
   - ExpoHead (4.0.9):
     - ExpoModulesCore
-  - ExpoKeepAwake (14.0.1):
+  - ExpoKeepAwake (14.0.3):
     - ExpoModulesCore
   - ExpoLinking (7.0.3):
     - ExpoModulesCore
-  - ExpoModulesCore (2.0.6):
+  - ExpoModulesCore (2.2.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2173,19 +2173,19 @@ SPEC CHECKSUMS:
   EXConstants: 277129d9a42ba2cf1fad375e7eaa9939005c60be
   EXJSONUtils: 01fc7492b66c234e395dcffdd5f53439c5c29c93
   EXManifests: 6bcc8c0997fc00831f2aa874d563004cfc509af0
-  Expo: 8948e8e417f699ed125a80389e150aabbae404bf
+  Expo: 63515728b6f238842dc95702eb0fb385f00d7c5a
   expo-dev-client: 6f30fa7fbf4aa6cb5765b983da2411bf63f665bb
   expo-dev-launcher: f37027e55535ac28df696da95e2b222e7333ecd7
   expo-dev-menu: 9adf097a707609148baa3002e87ae5860f27615e
   expo-dev-menu-interface: 00dc42302a72722fdecec3fa048de84a9133bcc4
   ExpoAsset: 6f7a8887cbb9fb39fdb0808e7f6f74ba0e1ae9b6
   ExpoBlur: 2b92367da8158eeaee9bfa940d82512a09c8e0c6
-  ExpoFileSystem: 83da9dbce2371cc72c3a3ef49e0df54a117310f1
+  ExpoFileSystem: 2d804c73034c0d65eb2a640e0a77627033b69edc
   ExpoFont: 12b0217e42ac97029d0f317f0486039a8508cf52
   ExpoHead: 8f54ac800b3ef60095313aa49f091c9c94c7304e
-  ExpoKeepAwake: 22173f45d767c7d37403fdf48292726901d69ce7
+  ExpoKeepAwake: b0171a73665bfcefcfcc311742a72a956e6aa680
   ExpoLinking: 40e30b571ffb77b280a38bed137d89b21f46f2a0
-  ExpoModulesCore: 8bbf85e190212bc72f444a4032a97b65c2a1ee93
+  ExpoModulesCore: 7f5e59799b89e5fad1d7cc6070744c1003ca320f
   ExpoSplashScreen: 8fe6e54b8b734a997da3c21d84b3ef61faa1bbf6
   ExpoSystemUI: 018496c0221ae4993cfc56b14e723af8c9a5aa22
   ExpoWebBrowser: b658ba8a9161f1b54afb279591cfce2cb73330fa
