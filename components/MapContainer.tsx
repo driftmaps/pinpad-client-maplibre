@@ -1,11 +1,11 @@
-import React, { useRef, useCallback } from 'react';
+import { useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import { MapView, Camera } from '@maplibre/maplibre-react-native';
 import { PinMarker } from './PinMarker';
 import { Pin } from '@/types/pin';
 
 interface MapContainerProps {
-  styleUrl: string;
+  styleURL: { base: string; version: number } | null;
   pins: Pin[];
   onMapPress: (event: any) => void;
   onPinPress: (pin: Pin) => void;
@@ -14,7 +14,7 @@ interface MapContainerProps {
 }
 
 export function MapContainer({
-  styleUrl,
+  styleURL,
   pins,
   onMapPress,
   onPinPress,
@@ -23,12 +23,22 @@ export function MapContainer({
 }: MapContainerProps) {
   const cameraRef = useRef(null);
 
+  console.log('[MapContainer] Rendering with:', {
+    styleURL,
+    pinsCount: pins.length,
+    cameraProps
+  });
+
   return (
     <MapView
+      key={styleURL?.version}
       style={styles.map}
-      mapStyle={styleUrl}
+      mapStyle={styleURL?.base}
       testID="map-view"
-      onPress={onMapPress}
+      onPress={(event) => {
+        console.log('[MapContainer] Map pressed:', event?.geometry?.coordinates);
+        onMapPress(event);
+      }}
     >
       <Camera
         ref={cameraRef}

@@ -15,6 +15,10 @@
         <string>Drift File</string>
         <key>LSHandlerRank</key>
         <string>Owner</string>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>drift</string>
+        </array>
         <key>LSItemContentTypes</key>
         <array>
           <string>com.example.drift</string>

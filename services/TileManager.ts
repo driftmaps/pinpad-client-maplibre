@@ -33,6 +33,7 @@ export class TileManager {
   async handleDriftUri(uri: string): Promise<void> {
     // Skip Expo development client URIs to avoid conflicts
     if (uri.startsWith('exp+pinpad-client-maplibre://')) {
+      console.log('[TileManager] Skipping Expo development client URI:', uri);
       return;
     }
 
@@ -47,24 +48,37 @@ export class TileManager {
 
   // Process a .drift file: extract it and set up the tile structure
   async processDriftFile(filePath: string): Promise<void> {
+    console.log('[TileManager] Processing drift file:', filePath);
     try {
       const extractionPath = `${FileSystem.documentDirectory}pinpad_tiles`;
+      console.log('[TileManager] Extraction path:', extractionPath);
 
-      // Clean up existing tiles (in production, would implement caching)
+      // Clean up existing tiles
       const dirInfo = await FileSystem.getInfoAsync(extractionPath);
       if (dirInfo.exists) {
+        console.log('[TileManager] Cleaning up existing tiles');
         await FileSystem.deleteAsync(extractionPath, {idempotent: true});
       }
-      await FileSystem.makeDirectoryAsync(
-          extractionPath, {intermediates: true});
+
+      console.log('[TileManager] Creating extraction directory');
+      await FileSystem.makeDirectoryAsync(extractionPath, {intermediates: true});
 
       // Extract the .drift file
+      console.log('[TileManager] Starting file extraction...');
+      const startTime = Date.now();
       await unzip(filePath, extractionPath);
+      const endTime = Date.now();
+      console.log(`[TileManager] Extraction completed in ${endTime - startTime}ms`);
 
-      // Set up paths for the extracted data
+      // Set up paths
       this.dataPath = `${extractionPath}/tiles`;
       this.tilesPath = `${this.dataPath}/data`;
       this.stylePath = `${this.dataPath}/style.json`;
+      console.log('[TileManager] Paths configured:', {
+        dataPath: this.dataPath,
+        tilesPath: this.tilesPath,
+        stylePath: this.stylePath
+      });
 
       // Process the style file
       const styleInfo = await FileSystem.getInfoAsync(this.stylePath);
@@ -108,23 +122,28 @@ export class TileManager {
   // Get the URI for the current style file
   getStyleUri(): string {
     if (!this.initialized || !this.stylePath) {
+      console.error('[TileManager] Not initialized or no stylePath');
       throw new Error('TileManager not initialized or no stylePath');
     }
+    console.log('[TileManager] Returning style URI:', this.stylePath);
     return this.stylePath;
   }
 
   getTilePath(): string {
     if (!this.initialized || !this.tilesPath) {
+      console.error('[TileManager] Not initialized or no tilesPath');
       throw new Error('TileManager not initialized or no tilesPath');
     }
+    console.log('[TileManager] Returning tile path:', this.tilesPath);
     return this.tilesPath;
   }
 
   public getCenter(): number[] {
     if (!this.initialized || !this.centerCoordinate) {
-      throw new Error(
-          'TileManager not initialized or center coordinate not set');
+      console.error('[TileManager] Not initialized or no centerCoordinate');
+      throw new Error('TileManager not initialized or center coordinate not set');
     }
+    console.log('[TileManager] Returning center coordinate:', this.centerCoordinate);
     return this.centerCoordinate;
   }
 }
