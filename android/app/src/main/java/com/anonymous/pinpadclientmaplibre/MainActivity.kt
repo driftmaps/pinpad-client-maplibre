@@ -17,7 +17,6 @@ class MainActivity : ReactActivity() {
     SplashScreenManager.registerOnActivity(this)
     // @generated end expo-splashscreen
     super.onCreate(null)
-    // Process any .drift file that triggered app launch
     handleFileIntent(intent)
   }
 

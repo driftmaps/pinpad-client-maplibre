@@ -21,18 +21,14 @@ import com.facebook.react.ReactInstanceEventListener
 class MainApplication : Application(), ReactApplication {
 
   companion object {
-    // Store React context globally for access from native code
     var reactContext: ReactContext? = null
   }
 
-  // Configure the React Native host with necessary packages and settings
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
         object : DefaultReactNativeHost(this) {
-          // Set up React Native packages (auto-linked and manual)
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages
-            // Packages that cannot be autolinked yet can be added manually here.
             return packages
           }
 
@@ -64,11 +60,9 @@ class MainApplication : Application(), ReactApplication {
         }
     })
 
-    // Initialize Expo lifecycle management
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
   }
 
-  // Handle configuration changes (e.g., rotation) with Expo
   override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
     ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig)

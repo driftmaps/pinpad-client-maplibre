@@ -7,13 +7,9 @@ import { listenForDriftFiles } from './hooks/listenForDriftFiles';
 import { MapContainer } from './components/MapContainer';
 import { PinManagement } from './components/PinManagement';
 
-// Main App component that handles map display and URI-based tile loading
 export default function App() {
-  // TileManager handles loading and processing of map tile data
   let{ tileManager, isLoading, error } = useTileManager();
-  console.log("[App] TileManager state:", { isLoading, error });
 
-  // styleUri state tracks the current map style and center coordinates
   const [styleUri, setStyleUri] = useState(null);
   console.log("[App] Current styleUri:", styleUri);
 
@@ -21,9 +17,7 @@ export default function App() {
     centerCoordinate: null,
     zoomLevel: 0,
   });
-  console.log("[App] Camera props:", CameraProps);
 
-  // set up handling of files events via deep linking
   listenForDriftFiles(tileManager, isLoading, setStyleUri, setCameraProps);
 
   const {
@@ -39,9 +33,8 @@ export default function App() {
 
 
   const isTransitioningRef = useRef(false);
-
+  
   const handleMapPress = useCallback((event) => {
-    console.log("[App] Map pressed:", event?.geometry?.coordinates);
     if (!event?.geometry?.coordinates || isTransitioningRef.current) return;
     
     isTransitioningRef.current = true;
@@ -49,8 +42,6 @@ export default function App() {
       longitude: event.geometry.coordinates[0],
       latitude: event.geometry.coordinates[1]
     };
-
-    console.log("[App] Setting new camera position:", coordinates);
     
     clearPendingPin();
     setSelectedPin(null);
@@ -61,6 +52,7 @@ export default function App() {
       animationMode: 'easeTo',
       animationDuration: 250
     });
+    
     setPendingPin(coordinates);
     setSelectedLocation(coordinates);
     

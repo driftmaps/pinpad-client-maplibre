@@ -6,7 +6,6 @@
 
 @implementation AppDelegate
 
-// Initialize the React Native app
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"main";
@@ -18,7 +17,6 @@
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-// Configure the JavaScript bundle location
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
   return [self bundleURL];

@@ -77,9 +77,7 @@
       [
         "expo-asset",
         {
-          "assets": [
-            "./assets/test.drift"
-          ]
+          "assets": ["./assets/test.drift"]
         }
       ]
     ],

@@ -23,22 +23,13 @@ export function MapContainer({
 }: MapContainerProps) {
   const cameraRef = useRef(null);
 
-  console.log('[MapContainer] Rendering with:', {
-    styleUrl,
-    pinsCount: pins.length,
-    cameraProps
-  });
-
   return (
     <MapView
       key={styleUrl?.version}
       style={styles.map}
       mapStyle={styleUrl?.base}
       testID="map-view"
-      onPress={(event) => {
-        console.log('[MapContainer] Map pressed:', event?.geometry?.coordinates);
-        onMapPress(event);
-      }}
+      onPress={onMapPress}
     >
       <Camera
         ref={cameraRef}
