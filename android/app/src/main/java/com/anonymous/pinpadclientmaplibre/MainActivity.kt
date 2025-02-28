@@ -1,4 +1,3 @@
-// Main Android activity that handles the React Native app and .drift file intents
 package com.anonymous.pinpadclientmaplibre
 import expo.modules.splashscreen.SplashScreenManager
 

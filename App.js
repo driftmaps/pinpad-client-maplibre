@@ -1,17 +1,11 @@
 import { useMemo, useState, useRef, useCallback } from "react";
-import {
-  StyleSheet,
-  View,
-  ActivityIndicator,
-  Text,
-  InteractionManager,
-} from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useTileManager } from "./hooks/useTileManager";
-import { usePinsState } from "./hooks/usePinsState";
-import { listenForDriftFiles } from "./hooks/listenForDriftFiles";
-import { MapContainer } from "./components/MapContainer";
-import { PinManagement } from "./components/PinManagement";
+import { StyleSheet, View, ActivityIndicator, Text, InteractionManager } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useTileManager } from './hooks/useTileManager';
+import { usePinsState } from './hooks/usePinsState';
+import { listenForDriftFiles } from './hooks/listenForDriftFiles';
+import { MapContainer } from './components/MapContainer';
+import { PinManagement } from './components/PinManagement';
 
 // Main App component that handles map display and URI-based tile loading
 export default function App() {
@@ -25,7 +19,6 @@ export default function App() {
 
   const [CameraProps, setCameraProps] = useState({
     centerCoordinate: [-73.72826520392081, 45.584043985983],
-    // centerCoordinate: tileManager?.getCenter() || [-73.72826520392081, 45.584043985983],
     zoomLevel: 10,
   });
   console.log("[App] Camera props:", CameraProps);
@@ -39,17 +32,15 @@ export default function App() {
     clearPendingPin,
     deletePin,
     finalizePendingPin,
-    updatePendingPin,
+    updatePendingPin
   } = usePinsState();
-
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedPin, setSelectedPin] = useState(null);
 
 
   const isTransitioningRef = useRef(false);
 
-  const handleMapPress = useCallback(
-    (event) => {
+  const handleMapPress = useCallback((event) => {
       console.log("[App] Map pressed:", event?.geometry?.coordinates);
       if (!event?.geometry?.coordinates || isTransitioningRef.current) return;
 
@@ -66,8 +57,8 @@ export default function App() {
       setCameraProps({
         centerCoordinate: [coordinates.longitude, coordinates.latitude],
         padding: { paddingBottom: 400 },
-        animationMode: "easeTo",
-        animationDuration: 250,
+        animationMode: 'easeTo',
+        animationDuration: 250
       });
 
       setPendingPin(coordinates);
@@ -76,9 +67,7 @@ export default function App() {
       InteractionManager.runAfterInteractions(() => {
         isTransitioningRef.current = false;
       });
-    },
-    [setPendingPin, clearPendingPin]
-  );
+    }, [setPendingPin, clearPendingPin]);
 
   const handleBottomSheetClose = useCallback(() => {
     if (isTransitioningRef.current) return;
@@ -94,18 +83,14 @@ export default function App() {
     });
   }, [clearPendingPin]);
 
-  const handlePinPress = useCallback(
-    (pin) => {
+  const handlePinPress = useCallback((pin) => {
       if (!isTransitioningRef.current) {
         isTransitioningRef.current = true;
 
         setCameraProps({
-          centerCoordinate: [
-            pin.coordinates.longitude,
-            pin.coordinates.latitude,
-          ],
+          centerCoordinate: [pin.coordinates.longitude, pin.coordinates.latitude],
           padding: { paddingBottom: 400 },
-          animationMode: "easeTo",
+          animationMode: 'easeTo',
           animationDuration: 250,
         });
 
@@ -117,17 +102,12 @@ export default function App() {
           isTransitioningRef.current = false;
         });
       }
-    },
-    [clearPendingPin]
-  );
+    }, [clearPendingPin]);
 
-  const handlePinDelete = useCallback(
-    (pin) => {
+  const handlePinDelete = useCallback((pin) => {
       deletePin(pin);
       handleBottomSheetClose();
-    },
-    [deletePin, handleBottomSheetClose]
-  );
+    }, [deletePin, handleBottomSheetClose]);
 
   const handlePinCreate = useCallback(
     (emoji, message) => {
@@ -143,12 +123,10 @@ export default function App() {
         setSelectedPin(null);
         clearPendingPin();
       });
-    },
-    [finalizePendingPin, selectedLocation, clearPendingPin]
-  );
+    }, [finalizePendingPin, selectedLocation, clearPendingPin]);
 
-  const visiblePins = useMemo(
-    () => pins.filter((pin) => pin && pin.coordinates),
+  const visiblePins = useMemo(() => 
+    pins.filter(pin => pin && pin.coordinates),
     [pins]
   );
 
@@ -165,7 +143,7 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         <MapContainer
-          styleURL={styleUri}
+          styleUrl={styleUri}
           pins={visiblePins}
           onMapPress={handleMapPress}
           onPinPress={handlePinPress}
@@ -192,11 +170,11 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorText: {
-    color: "red",
+    color: 'red',
     fontSize: 16,
   },
 });

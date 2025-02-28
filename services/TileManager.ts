@@ -1,15 +1,15 @@
-import {Asset} from 'expo-asset';
+import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
-import {unzip} from 'react-native-zip-archive';
+import { unzip } from 'react-native-zip-archive';
 
 // TileManager handles the loading, extraction, and management of map tile data
 // from .drift files
 export class TileManager {
   private initialized = false;
-  private dataPath: string|null = null;
-  private stylePath: string|null = null;
-  private tilesPath: string|null = null;
-  private centerCoordinate: [number, number]|null = null;
+  private dataPath: string | null = null;
+  private stylePath: string | null = null;
+  private tilesPath: string | null = null;
+  private centerCoordinate: [number, number] | null = null;
 
   // Initialize TileManager by loading and processing the default .drift file
   async initialize(): Promise<void> {
@@ -17,13 +17,10 @@ export class TileManager {
 
     try {
       // Load the bundled test.drift file using Expo's Asset system
-      const asset = await Asset.fromModule(require('../assets/test.drift'))
-                        .downloadAsync();
-
+      const asset = await Asset.fromModule(require('../assets/test.drift')).downloadAsync();
       await this.processDriftFile(asset.localUri!);
       this.initialized = true;
     } catch (error: any) {
-      console.error('TileManager initialization error:', error);
       throw new Error(`Failed to initialize TileManager: ${error.message}`);
     }
   }
@@ -81,11 +78,8 @@ export class TileManager {
       });
 
       // Process the style file
-      const styleInfo = await FileSystem.getInfoAsync(this.stylePath);
-
-      if (styleInfo.exists) {
+      if (await FileSystem.getInfoAsync(this.stylePath)) {
         const styleContent = await FileSystem.readAsStringAsync(this.stylePath);
-
         const style = JSON.parse(styleContent);
 
         // Get center coordinates from metadata or use default
@@ -94,21 +88,27 @@ export class TileManager {
           console.log('setting centerCoordinate to [lon, lat] = ', this.centerCoordinate);
         }
 
-        // Configure the tile source
+        // This code adds the tiles to the sources definition
+        // This approach suggests that we are going to limit the view
+        // to the tiles that we have at the point of interaction
+        // This may prove to be annoying for us and we may need
+        // to somehow intercept the request event
+        // but this is fine for now
+        // TODO: determine whether this is acceptable once we start
+        // using non-streaming approach
         style.sources = {
-          'custom-tiles': {
-            'type': 'vector',
-            'tiles': [`${this.tilesPath}/{z}/{x}/{y}.pbf`],
-            'zoomlevel': 9,
-            'maxzoom': 14,
-            'minzoom': 5
+          "custom-tiles": {
+            "type": "vector",
+            "tiles": [`${this.tilesPath}/{z}/{x}/{y}.pbf`],
+            "zoomlevel": 9,
+            "maxzoom": 14,
+            "minzoom": 5
           }
         };
 
         // Write back the modified style file
         await FileSystem.writeAsStringAsync(
             this.stylePath, JSON.stringify(style, null, 2));
-
       } else {
         console.error('Style file does not exist at', this.stylePath);
         throw new Error('Style file does not exist');

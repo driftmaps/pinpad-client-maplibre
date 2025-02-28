@@ -1,4 +1,3 @@
-// iOS App Delegate that handles React Native initialization and .drift file handling
 #import "AppDelegate.h"
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>

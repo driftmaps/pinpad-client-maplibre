@@ -5,7 +5,7 @@ import { PinMarker } from './PinMarker';
 import { Pin } from '@/types/pin';
 
 interface MapContainerProps {
-  styleURL: { base: string; version: number } | null;
+  styleUrl: { base: string; version: number } | null;
   pins: Pin[];
   onMapPress: (event: any) => void;
   onPinPress: (pin: Pin) => void;
@@ -14,7 +14,7 @@ interface MapContainerProps {
 }
 
 export function MapContainer({
-  styleURL,
+  styleUrl,
   pins,
   onMapPress,
   onPinPress,
@@ -24,16 +24,16 @@ export function MapContainer({
   const cameraRef = useRef(null);
 
   console.log('[MapContainer] Rendering with:', {
-    styleURL,
+    styleUrl,
     pinsCount: pins.length,
     cameraProps
   });
 
   return (
     <MapView
-      key={styleURL?.version}
+      key={styleUrl?.version}
       style={styles.map}
-      mapStyle={styleURL?.base}
+      mapStyle={styleUrl?.base}
       testID="map-view"
       onPress={(event) => {
         console.log('[MapContainer] Map pressed:', event?.geometry?.coordinates);

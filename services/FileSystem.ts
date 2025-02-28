@@ -35,8 +35,7 @@ export class FileSystemService {
   }
 
   async getTile(tilePath: string): Promise<string> {
-    const tileInfo = await FileSystem.getInfoAsync(tilePath);
-    if (!tileInfo.exists) {
+    if (!(await FileSystem.getInfoAsync(tilePath))) {
       throw new Error(`Tile not found: ${tilePath}`);
     }
     return tilePath;
