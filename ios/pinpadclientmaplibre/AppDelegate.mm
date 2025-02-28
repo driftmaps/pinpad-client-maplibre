@@ -57,7 +57,6 @@
         return YES; // Mark it handled
       }
     }
-    // If the bridge isn't ready, you could store `url` for later.
   }
 
   // Handle standard deep link URIs via Expo's Linking system
@@ -66,7 +65,7 @@
   return handledBySuper || handledByLinkingManager;
 }
 
-// Handle Universal Links
+// Universal Links
 - (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
   BOOL linkingManagerHandled = [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
   BOOL superHandled = [super application:application
@@ -75,17 +74,19 @@
   return superHandled || linkingManagerHandled;
 }
 
-// Remote notification handling methods required for compatibility
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
   return [super application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
 }
 
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
   return [super application:application didFailToRegisterForRemoteNotificationsWithError:error];
 }
 
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
   return [super application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];

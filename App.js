@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useCallback } from "react";
+import { useMemo, useState, useRef, useCallback } from 'react';
 import { StyleSheet, View, ActivityIndicator, Text, InteractionManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTileManager } from './hooks/useTileManager';
@@ -18,8 +18,8 @@ export default function App() {
   console.log("[App] Current styleUri:", styleUri);
 
   const [CameraProps, setCameraProps] = useState({
-    centerCoordinate: [-73.72826520392081, 45.584043985983],
-    zoomLevel: 10,
+    centerCoordinate: null,
+    zoomLevel: 0,
   });
   console.log("[App] Camera props:", CameraProps);
 
@@ -41,42 +41,42 @@ export default function App() {
   const isTransitioningRef = useRef(false);
 
   const handleMapPress = useCallback((event) => {
-      console.log("[App] Map pressed:", event?.geometry?.coordinates);
-      if (!event?.geometry?.coordinates || isTransitioningRef.current) return;
+    console.log("[App] Map pressed:", event?.geometry?.coordinates);
+    if (!event?.geometry?.coordinates || isTransitioningRef.current) return;
+    
+    isTransitioningRef.current = true;
+    const coordinates = {
+      longitude: event.geometry.coordinates[0],
+      latitude: event.geometry.coordinates[1]
+    };
 
-      isTransitioningRef.current = true;
-      const coordinates = {
-        longitude: event.geometry.coordinates[0],
-        latitude: event.geometry.coordinates[1],
-      };
-      console.log("[App] Setting new camera position:", coordinates);
-
-      clearPendingPin();
-      setSelectedPin(null);
-
-      setCameraProps({
-        centerCoordinate: [coordinates.longitude, coordinates.latitude],
-        padding: { paddingBottom: 400 },
-        animationMode: 'easeTo',
-        animationDuration: 250
-      });
-
-      setPendingPin(coordinates);
-      setSelectedLocation(coordinates);
-
-      InteractionManager.runAfterInteractions(() => {
-        isTransitioningRef.current = false;
-      });
-    }, [setPendingPin, clearPendingPin]);
-
+    console.log("[App] Setting new camera position:", coordinates);
+    
+    clearPendingPin();
+    setSelectedPin(null);
+    
+    setCameraProps({
+      centerCoordinate: [coordinates.longitude, coordinates.latitude],
+      padding: { paddingBottom: 400 },
+      animationMode: 'easeTo',
+      animationDuration: 250
+    });
+    setPendingPin(coordinates);
+    setSelectedLocation(coordinates);
+    
+    InteractionManager.runAfterInteractions(() => {
+      isTransitioningRef.current = false;
+    });
+  }, [setPendingPin, clearPendingPin]);
+  
   const handleBottomSheetClose = useCallback(() => {
     if (isTransitioningRef.current) return;
-
+    
     isTransitioningRef.current = true;
-
+    
     setSelectedLocation(null);
     setSelectedPin(null);
-
+    
     requestAnimationFrame(() => {
       clearPendingPin();
       isTransitioningRef.current = false;
@@ -84,49 +84,48 @@ export default function App() {
   }, [clearPendingPin]);
 
   const handlePinPress = useCallback((pin) => {
-      if (!isTransitioningRef.current) {
-        isTransitioningRef.current = true;
+    if (!isTransitioningRef.current) {
+      isTransitioningRef.current = true;
+      
+      setCameraProps({
+        centerCoordinate: [pin.coordinates.longitude, pin.coordinates.latitude],
+        padding: { paddingBottom: 400 },
+        animationMode: 'easeTo',
+        animationDuration: 250
+      });
 
-        setCameraProps({
-          centerCoordinate: [pin.coordinates.longitude, pin.coordinates.latitude],
-          padding: { paddingBottom: 400 },
-          animationMode: 'easeTo',
-          animationDuration: 250,
-        });
-
-        setSelectedPin(pin);
-        setSelectedLocation(pin.coordinates);
-        clearPendingPin();
-
-        InteractionManager.runAfterInteractions(() => {
-          isTransitioningRef.current = false;
-        });
-      }
-    }, [clearPendingPin]);
+      setSelectedPin(pin);
+      setSelectedLocation(pin.coordinates);
+      clearPendingPin();
+      
+      InteractionManager.runAfterInteractions(() => {
+        isTransitioningRef.current = false;
+      });
+    }
+  }, [clearPendingPin]);
 
   const handlePinDelete = useCallback((pin) => {
-      deletePin(pin);
-      handleBottomSheetClose();
-    }, [deletePin, handleBottomSheetClose]);
+    deletePin(pin);
+    handleBottomSheetClose();
+  }, [deletePin, handleBottomSheetClose]);
 
-  const handlePinCreate = useCallback(
-    (emoji, message) => {
-      finalizePendingPin({
-        emoji,
-        message,
-        coordinates: selectedLocation,
-        timestamp: Date.now(),
-      });
+  const handlePinCreate = useCallback((emoji, message) => {
+    finalizePendingPin({
+      emoji,
+      message,
+      coordinates: selectedLocation,
+      timestamp: Date.now()
+    });
 
-      requestAnimationFrame(() => {
-        setSelectedLocation(null);
-        setSelectedPin(null);
-        clearPendingPin();
-      });
-    }, [finalizePendingPin, selectedLocation, clearPendingPin]);
+    requestAnimationFrame(() => {
+      setSelectedLocation(null);
+      setSelectedPin(null);
+      clearPendingPin();
+    });
+  }, [finalizePendingPin, selectedLocation, clearPendingPin]);
 
   const visiblePins = useMemo(() => 
-    pins.filter(pin => pin && pin.coordinates),
+    pins.filter(pin => pin && pin.coordinates), 
     [pins]
   );
 
@@ -150,7 +149,7 @@ export default function App() {
           onPinRemove={deletePin}
           cameraProps={CameraProps}
         />
-
+        
         <PinManagement
           selectedLocation={selectedLocation}
           selectedPin={selectedPin}

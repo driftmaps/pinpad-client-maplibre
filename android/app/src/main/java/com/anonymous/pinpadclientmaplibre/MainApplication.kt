@@ -36,7 +36,6 @@ class MainApplication : Application(), ReactApplication {
             return packages
           }
 
-          // Configure React Native settings
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"
           override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
           override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
@@ -44,7 +43,6 @@ class MainApplication : Application(), ReactApplication {
       }
   )
 
-  // Create React host instance
   override val reactHost: ReactHost
     get() = ReactNativeHostWrapper.createReactHost(applicationContext, reactNativeHost)
 

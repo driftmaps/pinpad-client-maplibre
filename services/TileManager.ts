@@ -2,8 +2,6 @@ import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import { unzip } from 'react-native-zip-archive';
 
-// TileManager handles the loading, extraction, and management of map tile data
-// from .drift files
 export class TileManager {
   private initialized = false;
   private dataPath: string | null = null;
@@ -11,12 +9,10 @@ export class TileManager {
   private tilesPath: string | null = null;
   private centerCoordinate: [number, number] | null = null;
 
-  // Initialize TileManager by loading and processing the default .drift file
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
     try {
-      // Load the bundled test.drift file using Expo's Asset system
       const asset = await Asset.fromModule(require('../assets/test.drift')).downloadAsync();
       await this.processDriftFile(asset.localUri!);
       this.initialized = true;
@@ -50,9 +46,9 @@ export class TileManager {
       const extractionPath = `${FileSystem.documentDirectory}pinpad_tiles`;
       console.log('[TileManager] Extraction path:', extractionPath);
 
-      // Clean up existing tiles
-      const dirInfo = await FileSystem.getInfoAsync(extractionPath);
-      if (dirInfo.exists) {
+      // Currently we are forcing a clean up
+      // in real world we would be keeping caches
+      if (await FileSystem.getInfoAsync(extractionPath)) {
         console.log('[TileManager] Cleaning up existing tiles');
         await FileSystem.deleteAsync(extractionPath, {idempotent: true});
       }
@@ -110,7 +106,6 @@ export class TileManager {
         await FileSystem.writeAsStringAsync(
             this.stylePath, JSON.stringify(style, null, 2));
       } else {
-        console.error('Style file does not exist at', this.stylePath);
         throw new Error('Style file does not exist');
       }
     } catch (error: any) {
@@ -122,16 +117,13 @@ export class TileManager {
   // Get the URI for the current style file
   getStyleUri(): string {
     if (!this.initialized || !this.stylePath) {
-      console.error('[TileManager] Not initialized or no stylePath');
       throw new Error('TileManager not initialized or no stylePath');
     }
-    console.log('[TileManager] Returning style URI:', this.stylePath);
     return this.stylePath;
   }
 
   getTilePath(): string {
     if (!this.initialized || !this.tilesPath) {
-      console.error('[TileManager] Not initialized or no tilesPath');
       throw new Error('TileManager not initialized or no tilesPath');
     }
     console.log('[TileManager] Returning tile path:', this.tilesPath);
@@ -140,10 +132,8 @@ export class TileManager {
 
   public getCenter(): number[] {
     if (!this.initialized || !this.centerCoordinate) {
-      console.error('[TileManager] Not initialized or no centerCoordinate');
       throw new Error('TileManager not initialized or center coordinate not set');
     }
-    console.log('[TileManager] Returning center coordinate:', this.centerCoordinate);
     return this.centerCoordinate;
   }
 }
