@@ -17,13 +17,16 @@
           {
             "CFBundleTypeName": "Drift File",
             "LSHandlerRank": "Owner",
-            "CFBundleTypeExtensions": ["drift"],
-            "LSItemContentTypes": ["public.text"]
+            "CFBundleTypeExtensions": [
+              "drift"
+            ],
+            "LSItemContentTypes": [
+              "com.example.drift"
+            ]
           }
         ]
       }
     },
-
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -45,17 +48,20 @@
               "pathPattern": ".*\\.drift"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
-
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "./withCustomInfoPlist",
       "expo-router",
       [
         "expo-splash-screen",
@@ -71,7 +77,9 @@
       [
         "expo-asset",
         {
-          "assets": ["./assets/test.drift"]
+          "assets": [
+            "./assets/test.drift"
+          ]
         }
       ]
     ],
