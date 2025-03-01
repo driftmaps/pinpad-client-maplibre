@@ -17,12 +17,8 @@
           {
             "CFBundleTypeName": "Drift File",
             "LSHandlerRank": "Owner",
-            "CFBundleTypeExtensions": [
-              "drift"
-            ],
-            "LSItemContentTypes": [
-              "com.example.drift"
-            ]
+            "CFBundleTypeExtensions": ["drift"],
+            "LSItemContentTypes": ["com.example.drift"]
           }
         ]
       }
@@ -48,10 +44,7 @@
               "pathPattern": ".*\\.drift"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },

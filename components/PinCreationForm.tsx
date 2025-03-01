@@ -9,28 +9,39 @@ interface PinCreationFormProps {
   onMessageChange: (message: string) => void;
 }
 
-export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect, onMessageChange }: PinCreationFormProps) {
+export function PinCreationForm({
+  onSubmit,
+  onCancel,
+  onEmojiSelect,
+  onMessageChange,
+}: PinCreationFormProps) {
   const [emoji, setEmoji] = useState('📍');
   const [message, setMessage] = useState('');
 
-  const handleEmojiSelect = useCallback((selectedEmoji: string) => {
-    setEmoji(selectedEmoji);
-    onEmojiSelect(selectedEmoji);
-  }, [onEmojiSelect]);
+  const handleEmojiSelect = useCallback(
+    (selectedEmoji: string) => {
+      setEmoji(selectedEmoji);
+      onEmojiSelect(selectedEmoji);
+    },
+    [onEmojiSelect]
+  );
 
-  const handleMessageChange = useCallback((text: string) => {
-    setMessage(text);
-    onMessageChange(text);
-  }, [onMessageChange]);
+  const handleMessageChange = useCallback(
+    (text: string) => {
+      setMessage(text);
+      onMessageChange(text);
+    },
+    [onMessageChange]
+  );
 
   const handleSubmit = useCallback(() => {
     if (!emoji) return;
-    
+
     const submissionEmoji = emoji;
     const submissionMessage = message;
-  
+
     onSubmit(submissionEmoji, submissionMessage);
-  
+
     requestAnimationFrame(() => {
       setMessage('');
       setEmoji('📍');
@@ -39,11 +50,7 @@ export function PinCreationForm({ onSubmit, onCancel, onEmojiSelect, onMessageCh
 
   return (
     <View style={styles.container}>
-      <EmojiSelectionForm
-        selected={emoji}
-        onSelect={handleEmojiSelect}
-        testID="emoji-selector"
-      />
+      <EmojiSelectionForm selected={emoji} onSelect={handleEmojiSelect} testID="emoji-selector" />
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -81,7 +88,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   input: {
     borderWidth: 1,

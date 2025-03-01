@@ -7,19 +7,16 @@ const path = require('path');
 // We cannot even set the deployment target in the Podfile.properties.json
 // because Expo is overwriting the Podfile.properties.json with the default values
 // This plugin sets the deployment target to 15.5 in the Podfile
-const withIosDeploymentTarget = (config) => {
+const withIosDeploymentTarget = config => {
   return withDangerousMod(config, [
     'ios',
-    async (config) => {
+    async config => {
       const podfilePath = path.join(config.modRequest.platformProjectRoot, 'Podfile');
       let podfileContent = fs.readFileSync(podfilePath, 'utf8');
-      
+
       // Replace the platform line with our fixed version
-      podfileContent = podfileContent.replace(
-        /platform :ios.*/,
-        'platform :ios, \'15.5\''
-      );
-      
+      podfileContent = podfileContent.replace(/platform :ios.*/, "platform :ios, '15.5'");
+
       fs.writeFileSync(podfilePath, podfileContent);
       return config;
     },

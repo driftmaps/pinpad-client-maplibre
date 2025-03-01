@@ -40,10 +40,14 @@
         "fill-color": [
           "match",
           ["get", "class"],
-          "park", "#331111",
-          "industrial", "#4d1a1a",
-          "residential", "#662222",
-          "commercial", "#802929",
+          "park",
+          "#331111",
+          "industrial",
+          "#4d1a1a",
+          "residential",
+          "#662222",
+          "commercial",
+          "#802929",
           "#2b2b2b"
         ],
         "fill-opacity": 0.8

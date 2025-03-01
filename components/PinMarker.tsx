@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { TouchableOpacity, Text, StyleSheet, View, Platform } from 'react-native';
-import {  MarkerView } from '@maplibre/maplibre-react-native';
+import { MarkerView } from '@maplibre/maplibre-react-native';
 import { Pin } from '@/types/pin';
 
 interface PinMarkerProps {
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
         elevation: 5,
         width: 'auto',
         alignSelf: 'center',
-      }
+      },
     }),
   },
   emoji: {

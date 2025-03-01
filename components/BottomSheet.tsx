@@ -8,21 +8,26 @@ interface BottomSheetProps {
   testID?: string;
 }
 
-export function BottomSheet({ 
-  visible, 
-  onClose, 
-  children, 
-  testID = 'bottom-sheet' 
+export function BottomSheet({
+  visible,
+  onClose,
+  children,
+  testID = 'bottom-sheet',
 }: BottomSheetProps) {
   return visible ? (
-    <View 
-      style={[StyleSheet.absoluteFill, styles.container]} 
+    <View
+      style={[StyleSheet.absoluteFill, styles.container]}
       pointerEvents="box-none"
       testID={testID}
       accessible={false}
       focusable={false}
     >
-      <View style={styles.contentContainer} pointerEvents="box-none" accessible={false} focusable={false}>
+      <View
+        style={styles.contentContainer}
+        pointerEvents="box-none"
+        accessible={false}
+        focusable={false}
+      >
         {children}
       </View>
     </View>

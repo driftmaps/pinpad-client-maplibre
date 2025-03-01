@@ -1,13 +1,14 @@
-import {useEffect} from 'react';
-import {Linking} from 'react-native';
+import { useEffect } from 'react';
+import { Linking } from 'react-native';
 
-import {TileManager} from '../services/TileManager';
-
+import { TileManager } from '../services/TileManager';
 
 export async function listenForDriftFiles(
-    tileManager: TileManager, isLoading: boolean,
-    setStyleUri: (styleUri: {base: string; version: number}) => void,
-    setCameraProps: (props: any) => void) {
+  tileManager: TileManager,
+  isLoading: boolean,
+  setStyleUri: (styleUri: { base: string; version: number }) => void,
+  setCameraProps: (props: any) => void
+) {
   // Updates the style URI with a version timestamp to force MapView to reload
   const updateStyleUri = () => {
     const baseStyleUri = tileManager.getStyleUri();
@@ -17,7 +18,7 @@ export async function listenForDriftFiles(
     }
     const version = new Date().getTime();
     console.log('[listenForDriftFiles] Updating style URI:', { baseStyleUri, version });
-    setStyleUri({base: baseStyleUri, version});
+    setStyleUri({ base: baseStyleUri, version });
 
     // Update camera position to match new drift file's center
     const centerCoordinate = tileManager.getCenter();
@@ -26,7 +27,7 @@ export async function listenForDriftFiles(
       centerCoordinate,
       zoomLevel: 10,
       animationMode: 'flyTo',
-      animationDuration: 2000
+      animationDuration: 2000,
     });
   };
 
@@ -66,9 +67,8 @@ export async function listenForDriftFiles(
           updateStyleUri();
         }
       });
-      
-      const subscription =
-          Linking.addEventListener('url', (event) => handleUri(event.url));
+
+      const subscription = Linking.addEventListener('url', event => handleUri(event.url));
       return () => {
         console.log('[listenForDriftFiles] Cleaning up URI listeners');
         subscription.remove();

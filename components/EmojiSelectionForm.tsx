@@ -10,7 +10,7 @@ interface EmojiSelectionForm {
 
 export function EmojiSelectionForm({ onSelect }: EmojiSelectionForm) {
   return (
-    <View style={styles.container} testID={"emoji-selector"} accessible={false}>
+    <View style={styles.container} testID={'emoji-selector'} accessible={false}>
       <EmojiSelector
         onEmojiSelected={onSelect}
         showSearchBar={false}

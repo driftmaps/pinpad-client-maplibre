@@ -32,7 +32,7 @@ export class TileManager {
 
     try {
       const localPath = FileSystem.cacheDirectory + 'downloaded.drift';
-      await FileSystem.copyAsync({from: uri, to: localPath});
+      await FileSystem.copyAsync({ from: uri, to: localPath });
       await this.processDriftFile(localPath);
     } catch (error) {
       throw error;
@@ -50,11 +50,11 @@ export class TileManager {
       // in real world we would be keeping caches
       if (await FileSystem.getInfoAsync(extractionPath)) {
         console.log('[TileManager] Cleaning up existing tiles');
-        await FileSystem.deleteAsync(extractionPath, {idempotent: true});
+        await FileSystem.deleteAsync(extractionPath, { idempotent: true });
       }
 
       console.log('[TileManager] Creating extraction directory');
-      await FileSystem.makeDirectoryAsync(extractionPath, {intermediates: true});
+      await FileSystem.makeDirectoryAsync(extractionPath, { intermediates: true });
 
       // Extract the .drift file
       console.log('[TileManager] Starting file extraction...');
@@ -70,7 +70,7 @@ export class TileManager {
       console.log('[TileManager] Paths configured:', {
         dataPath: this.dataPath,
         tilesPath: this.tilesPath,
-        stylePath: this.stylePath
+        stylePath: this.stylePath,
       });
 
       // Process the style file
@@ -93,18 +93,17 @@ export class TileManager {
         // TODO: determine whether this is acceptable once we start
         // using non-streaming approach
         style.sources = {
-          "custom-tiles": {
-            "type": "vector",
-            "tiles": [`${this.tilesPath}/{z}/{x}/{y}.pbf`],
-            "zoomlevel": 9,
-            "maxzoom": 14,
-            "minzoom": 5
-          }
+          'custom-tiles': {
+            type: 'vector',
+            tiles: [`${this.tilesPath}/{z}/{x}/{y}.pbf`],
+            zoomlevel: 9,
+            maxzoom: 14,
+            minzoom: 5,
+          },
         };
 
         // Write back the modified style file
-        await FileSystem.writeAsStringAsync(
-            this.stylePath, JSON.stringify(style, null, 2));
+        await FileSystem.writeAsStringAsync(this.stylePath, JSON.stringify(style, null, 2));
       } else {
         throw new Error('Style file does not exist');
       }

@@ -14,7 +14,9 @@
     "test:maestro": "maestro test .maestro/",
     "test:maestro:ios": "bash tests/test-ios.sh",
     "test:maestro:android": "bash tests/test-android.sh",
-    "generate-test-data": "cd assets && zip -r test.drift tiles"
+    "generate-test-data": "cd assets && zip -r test.drift tiles",
+    "prepare": "husky",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\""
   },
   "jest": {
     "preset": "jest-expo"
@@ -54,9 +56,12 @@
     "@types/react": "~18.3.12",
     "@types/react-test-renderer": "^18.3.0",
     "hermes-engine": "^0.11.0",
+    "husky": "^9.1.7",
     "jest": "^29.2.1",
     "jest-expo": "~52.0.2",
+    "lint-staged": "^15.4.3",
     "maestro-cli": "^1.1.10",
+    "prettier": "^3.5.2",
     "react-test-renderer": "18.3.1",
     "string-width": "4.2.3",
     "typescript": "^5.3.3",

@@ -19,7 +19,7 @@ export function MapContainer({
   onMapPress,
   onPinPress,
   onPinRemove,
-  cameraProps
+  cameraProps,
 }: MapContainerProps) {
   const cameraRef = useRef(null);
 
@@ -31,20 +31,10 @@ export function MapContainer({
       testID="map-view"
       onPress={onMapPress}
     >
-      <Camera
-        ref={cameraRef}
-        {...cameraProps}
-      />
-      {
-        pins.map(pin => (
-          <PinMarker
-            key={pin.id}
-            pin={pin}
-            onRemove={onPinRemove}
-            onPress={onPinPress}
-          />
-        ))
-      }
+      <Camera ref={cameraRef} {...cameraProps} />
+      {pins.map(pin => (
+        <PinMarker key={pin.id} pin={pin} onRemove={onPinRemove} onPress={onPinPress} />
+      ))}
     </MapView>
   );
 }
@@ -53,4 +43,4 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-}); 
+});
