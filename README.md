@@ -44,29 +44,13 @@ yarn setup:formatters
 
 This will download the necessary formatters to the `.formatters` directory. The formatters are not committed to the repository and will be downloaded automatically when needed.
 
-### Manual Formatting
-
-To manually format files:
-
-```
-# Format JS/TS files
-yarn format
-
-# Format Kotlin files
-yarn format:kotlin
-
-# Format Swift files
-yarn format:swift
-
-# Format all files
-yarn format:all
-```
-
 The formatting configurations are defined in:
 
 - `.prettierrc.json` for Prettier
 - `.editorconfig` for ktlint
 - `.swiftformat` for SwiftFormat
+
+Manual formatting commands are given as yarn scripts.
 
 ## Expo
 
