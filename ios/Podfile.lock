@@ -2191,11 +2191,11 @@ SPEC CHECKSUMS:
   ExpoWebBrowser: b658ba8a9161f1b54afb279591cfce2cb73330fa
   EXUpdatesInterface: 7c977640bdd8b85833c19e3959ba46145c5719db
   FBLazyVector: be7314029d6ec6b90f0f75ce1195b8130ed9ac4f
-  fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
-  glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
-  hermes-engine: 0555a84ea495e8e3b4bde71b597cd87fbb382888
+  fmt: fad7775865bb4340e98e10997c965fd61b3c749e
+  glog: 94308668c25e8ccac76f853cda1931c7aa3f5fae
+  hermes-engine: 77f19b2923ed39b21649b7551471674e3ace7a0a
   maplibre-react-native: 69504f9aa155f4c8406d0a8c2e69df35a5b5dd7e
-  RCT-Folly: 84578c8756030547307e4572ab1947de1685c599
+  RCT-Folly: aac5a2e8a7b6b8108945e58a66d08f78b800a1ea
   RCTDeprecation: 2c5e1000b04ab70b53956aa498bf7442c3c6e497
   RCTRequired: 5f785a001cf68a551c5f5040fb4c415672dbb481
   RCTTypeSafety: 6b98db8965005d32449605c0d005ecb4fee8a0f7
