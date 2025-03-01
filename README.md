@@ -26,15 +26,47 @@ As always, the file `package.json` defines some aliases for our most commonly us
 
 ## Code Formatting
 
-This project uses Prettier for code formatting. The formatting is automatically applied to staged files before each commit using Husky and lint-staged.
+This project uses code formatters to maintain consistent code style across all languages:
 
-To manually format all files in the project:
+- **Prettier** for JavaScript, TypeScript, JSON, CSS, and Markdown files
+- **ktlint** for Kotlin files (Android)
+- **SwiftFormat** for Swift files (iOS)
+
+The formatters are automatically applied to staged files before each commit using Husky and lint-staged.
+
+### Setup
+
+To set up all formatters:
 
 ```
+yarn setup:formatters
+```
+
+This will download the necessary formatters to the `.formatters` directory. The formatters are not committed to the repository and will be downloaded automatically when needed.
+
+### Manual Formatting
+
+To manually format files:
+
+```
+# Format JS/TS files
 yarn format
+
+# Format Kotlin files
+yarn format:kotlin
+
+# Format Swift files
+yarn format:swift
+
+# Format all files
+yarn format:all
 ```
 
-The formatting configuration is defined in `.prettierrc.json`.
+The formatting configurations are defined in:
+
+- `.prettierrc.json` for Prettier
+- `.editorconfig` for ktlint
+- `.swiftformat` for SwiftFormat
 
 ## Expo
 

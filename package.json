@@ -16,7 +16,11 @@
     "test:maestro:android": "bash tests/test-android.sh",
     "generate-test-data": "cd assets && zip -r test.drift tiles",
     "prepare": "husky",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\""
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:kotlin": "bash -c \"[ -f .formatters/ktlint ] || (echo 'ktlint not found. Running setup...' && ./scripts/setup-formatters.sh) && .formatters/ktlint --format -F --relative android/**/*.kt\"",
+    "format:swift": "bash -c \"[ -f .formatters/swiftformat ] || (echo 'swiftformat not found. Running setup...' && ./scripts/setup-formatters.sh) && .formatters/swiftformat ios/\"",
+    "format:all": "yarn format && yarn format:kotlin && yarn format:swift",
+    "setup:formatters": "./scripts/setup-formatters.sh"
   },
   "jest": {
     "preset": "jest-expo"

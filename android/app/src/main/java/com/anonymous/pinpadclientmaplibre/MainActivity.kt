@@ -1,11 +1,9 @@
 package com.anonymous.pinpadclientmaplibre
-import expo.modules.splashscreen.SplashScreenManager
-
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-
 import com.facebook.react.ReactActivity
+import expo.modules.splashscreen.SplashScreenManager
 
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,19 +25,18 @@ class MainActivity : ReactActivity() {
   override fun getMainComponentName(): String = "main"
 
   override fun onNewIntent(intent: Intent?) {
-      super.onNewIntent(intent)
-      intent?.let { handleFileIntent(it) }
+    super.onNewIntent(intent)
+    intent?.let { handleFileIntent(it) }
   }
 
   // Process intents for .drift files and send events to React Native
   private fun handleFileIntent(intent: Intent) {
-      if (intent.action == Intent.ACTION_VIEW) {
-          val uri: Uri? = intent.data
-          if (uri != null && uri.toString().lowercase().endsWith(".drift")) {
-              // Send the event via DriftFileUtil.
-              DriftFileUtil.sendDriftFileEvent(uri.toString())
-          }
+    if (intent.action == Intent.ACTION_VIEW) {
+      val uri: Uri? = intent.data
+      if (uri != null && uri.toString().lowercase().endsWith(".drift")) {
+        // Send the event via DriftFileUtil.
+        DriftFileUtil.sendDriftFileEvent(uri.toString())
       }
+    }
   }
-
 }
