@@ -1,13 +1,25 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react';
+import { useMemo, useState, useRef, useCallback } from 'react';
 import { StyleSheet, View, ActivityIndicator, Text, InteractionManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTileManager } from './hooks/useTileManager';
 import { usePinsState } from './hooks/usePinsState';
+import { listenForDriftFiles } from './hooks/listenForDriftFiles';
 import { MapContainer } from './components/MapContainer';
 import { PinManagement } from './components/PinManagement';
 
 export default function App() {
-  const { tileManager, isLoading, error } = useTileManager();
+  let{ tileManager, isLoading, error } = useTileManager();
+
+  const [styleUri, setStyleUri] = useState(null);
+  console.log("[App] Current styleUri:", styleUri);
+
+  const [CameraProps, setCameraProps] = useState({
+    centerCoordinate: null,
+    zoomLevel: 0,
+  });
+
+  listenForDriftFiles(tileManager, isLoading, setStyleUri, setCameraProps);
+
   const {
     pins,
     setPendingPin,
@@ -19,11 +31,6 @@ export default function App() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedPin, setSelectedPin] = useState(null);
 
-  const [initialCameraProps, setInitialCameraProps] = useState({
-    // Montreal coordinates
-    centerCoordinate: [-73.72826520392081, 45.584043985983],
-    zoomLevel: 10,
-  });
 
   const isTransitioningRef = useRef(false);
   
@@ -39,7 +46,7 @@ export default function App() {
     clearPendingPin();
     setSelectedPin(null);
     
-    setInitialCameraProps({
+    setCameraProps({
       centerCoordinate: [coordinates.longitude, coordinates.latitude],
       padding: { paddingBottom: 400 },
       animationMode: 'easeTo',
@@ -72,7 +79,7 @@ export default function App() {
     if (!isTransitioningRef.current) {
       isTransitioningRef.current = true;
       
-      setInitialCameraProps({
+      setCameraProps({
         centerCoordinate: [pin.coordinates.longitude, pin.coordinates.latitude],
         padding: { paddingBottom: 400 },
         animationMode: 'easeTo',
@@ -127,12 +134,12 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         <MapContainer
-          styleUrl={tileManager.getStyleUrl()}
+          styleUrl={styleUri}
           pins={visiblePins}
           onMapPress={handleMapPress}
           onPinPress={handlePinPress}
           onPinRemove={deletePin}
-          cameraProps={initialCameraProps}
+          cameraProps={CameraProps}
         />
         
         <PinManagement

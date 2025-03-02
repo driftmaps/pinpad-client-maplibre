@@ -15,23 +15,25 @@ import com.facebook.soloader.SoLoader
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.ReactInstanceEventListener
 
 class MainApplication : Application(), ReactApplication {
+
+  companion object {
+    var reactContext: ReactContext? = null
+  }
 
   override val reactNativeHost: ReactNativeHost = ReactNativeHostWrapper(
         this,
         object : DefaultReactNativeHost(this) {
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages
-            // Packages that cannot be autolinked yet can be added manually here, for example:
-            // packages.add(new MyReactNativePackage());
             return packages
           }
 
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"
-
           override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
-
           override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
           override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
       }
@@ -42,11 +44,22 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    // Initialize native code loader
     SoLoader.init(this, OpenSourceMergedSoMapping)
+    
+    // Set up new architecture if enabled
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
     }
+
+    // Store React context when it's initialized
+    reactNativeHost.reactInstanceManager.addReactInstanceEventListener(object : ReactInstanceEventListener {
+        override fun onReactContextInitialized(reactContext: ReactContext) {
+            MainApplication.reactContext = reactContext
+        }
+    })
+
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
   }
 
