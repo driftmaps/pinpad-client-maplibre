@@ -7,6 +7,8 @@ const defaultStyle = require('../assets/tiles/style.json');
 
 export type MapMode = 'streaming' | 'reading';
 
+const defaultCenterCoordinate: [number, number] = [-73.72826520392081, 45.584043985983];
+
 export class TileManager {
   private initialized = false;
   private dataPath: string | null = null;
@@ -30,8 +32,8 @@ export class TileManager {
             console.log('[TileManager] Setting centerCoordinate from streaming mode to [lon, lat] = ', this.centerCoordinate);
           } else {
             // Default coordinates if not found in style file
-            this.centerCoordinate = [-73.72826520392081, 45.584043985983];
-            console.log('[TileManager] Using default centerCoordinate: ', this.centerCoordinate);
+            this.centerCoordinate = defaultCenterCoordinate;
+            console.error('[No centerCoordinate found in style file, using default: ', this.centerCoordinate);
           }
 
           this.initialized = true;
@@ -40,45 +42,23 @@ export class TileManager {
         } catch (err) {
           console.error('[TileManager] Error loading style.json in streaming mode:', err);
           // Fall back to default coordinates
-          this.centerCoordinate = [-73.72826520392081, 45.584043985983];
+          this.centerCoordinate = defaultCenterCoordinate;
           console.log('[TileManager] Using fallback centerCoordinate: ', this.centerCoordinate);
           this.initialized = true;
           return;
         }
       }
-
-      // For reading mode, load a .drift file
-      try {
-        console.log('[TileManager] Initializing in reading mode');
-        const asset = await Asset.fromModule(require('../assets/test.drift')).downloadAsync();
-        await this.processDriftFile(asset.localUri!);
-        this.initialized = true;
-      } catch (driftError) {
-        console.error('[TileManager] Error loading drift file:', driftError);
-        // Fall back to streaming mode if drift loading fails
-        this.mode = 'streaming';
-        this.centerCoordinate = [-73.72826520392081, 45.584043985983];
-        console.log('[TileManager] Falling back to streaming mode with default coordinates');
-        this.initialized = true;
-      }
     } catch (error: any) {
-      console.error('[TileManager] Initialization error:', error);
       // Even if there's an error, initialize with streaming mode as a fallback
       this.mode = 'streaming';
-      this.centerCoordinate = [-73.72826520392081, 45.584043985983];
+      this.centerCoordinate = defaultCenterCoordinate;
       this.initialized = true;
       console.log('[TileManager] Forcibly initialized with streaming mode due to error');
-
-      throw new Error(`Failed to initialize TileManager: ${error.message}`);
     }
   }
 
   // Handle incoming .drift files from URIs (e.g., from deep links or file system)
   async handleDriftUri(uri: string): Promise<void> {
-    if (!uri.toLowerCase().endsWith('.drift')) {
-      console.log('[TileManager] Skipping non-drift URI:', uri);
-      return;
-    }
 
     // Skip Expo development client URIs to avoid conflicts
     if (uri.startsWith('exp+pinpad-client-maplibre://')) {

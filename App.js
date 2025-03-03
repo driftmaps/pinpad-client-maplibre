@@ -3,7 +3,7 @@ import { StyleSheet, View, ActivityIndicator, Text, InteractionManager } from 'r
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTileManager } from './hooks/useTileManager';
 import { usePinsState } from './hooks/usePinsState';
-import { useListenForDriftFiles } from './hooks/listenForDriftFiles';
+import { useListenForDriftFiles } from './hooks/useListenForDriftFiles';
 import { MapContainer } from './components/MapContainer';
 import { PinManagement } from './components/PinManagement';
 
@@ -11,7 +11,6 @@ export default function App() {
   const { tileManager, isLoading, error } = useTileManager();
 
   const [styleUri, setStyleUri] = useState(null);
-  console.log("[App] Current styleUri:", styleUri);
 
   const [CameraProps, setCameraProps] = useState({
     centerCoordinate: [-73.72826520392081, 45.584043985983], // Default coordinates

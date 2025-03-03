@@ -3,7 +3,6 @@ import { Linking } from 'react-native';
 
 import { TileManager } from '../services/TileManager';
 
-// Renamed to useListenForDriftFiles to follow React hook naming conventions
 export function useListenForDriftFiles(
   tileManager: TileManager | null,
   isLoading: boolean,
@@ -75,9 +74,8 @@ export function useListenForDriftFiles(
   const handleUri = async (uri: string | null): Promise<void> => {
     if (!tileManager) return;
 
-    console.log('[useListenForDriftFiles] Received URI:', uri);
     if (!uri) {
-      console.log('[useListenForDriftFiles] Empty URI received, skipping');
+      console.warn('[useListenForDriftFiles] Empty URI received, skipping');
       return;
     }
     if (isLoading) {
@@ -85,23 +83,15 @@ export function useListenForDriftFiles(
       return;
     }
     try {
-      // Only handle drift files if the URI is a drift file
-      if (uri.toLowerCase().endsWith('.drift')) {
-        console.log('[useListenForDriftFiles] Processing .drift URI with TileManager');
-        await tileManager.handleDriftUri(uri);
+      await tileManager.handleDriftUri(uri);
+      updateStyleUri();
 
-        // Update style URI after processing the drift file
-        updateStyleUri();
-      } else {
-        console.log('[useListenForDriftFiles] Ignoring non-drift URI:', uri);
-      }
     } catch (err) {
-      console.error('[useListenForDriftFiles] Error handling URI:', err);
 
       // If there's an error, ensure we're still in a valid state
       const currentMode = tileManager.getMode();
       if (currentMode !== 'streaming') {
-        console.log('[useListenForDriftFiles] Error occurred, switching back to streaming mode');
+        console.warn('[useListenForDriftFiles] Error occurred, switching back to streaming mode');
         tileManager.setMode('streaming');
         updateStyleUri();
       }
@@ -129,17 +119,11 @@ export function useListenForDriftFiles(
     }
 
     // Always listen for new URLs
-    const subscription = Linking.addEventListener('url', (event) => {
-      if (event.url && event.url.toLowerCase().endsWith('.drift')) {
-        handleUri(event.url);
-      } else {
-        console.log('[useListenForDriftFiles] Ignoring non-drift URL:', event.url);
-      }
-    });
+    const subscription = Linking.addEventListener('url', (event) => handleUri(event.url));
 
     return () => {
       console.log('[useListenForDriftFiles] Cleaning up URI listeners');
       subscription.remove();
     };
-  }, [tileManager, isLoading]);
+  }, [isLoading, tileManager]);
 }
