@@ -85,9 +85,7 @@ export function useListenForDriftFiles(
     try {
       await tileManager.handleDriftUri(uri);
       updateStyleUri();
-
     } catch (err) {
-
       // If there's an error, ensure we're still in a valid state
       const currentMode = tileManager.getMode();
       if (currentMode !== 'streaming') {

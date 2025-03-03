@@ -16,6 +16,8 @@ export class TileManager {
   private tilesPath: string | null = null;
   private centerCoordinate: [number, number] | null = null;
   private mode: MapMode = 'streaming'; // Default to streaming mode
+  // This should just become centralized state
+  private isLoading = false;
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
@@ -57,12 +59,18 @@ export class TileManager {
     }
   }
 
+  getIsLoading(): boolean {
+    return this.isLoading;
+  }
+
   // Handle incoming .drift files from URIs (e.g., from deep links or file system)
   async handleDriftUri(uri: string): Promise<void> {
+    this.isLoading = true;
 
     // Skip Expo development client URIs to avoid conflicts
     if (uri.startsWith('exp+pinpad-client-maplibre://')) {
       console.log('[TileManager] Skipping Expo development client URI:', uri);
+      this.isLoading = false;
       return;
     }
 
@@ -80,6 +88,7 @@ export class TileManager {
         console.log('[TileManager] File info:', info);
       } catch (infoError: any) {
         console.error('[TileManager] Error checking file info:', infoError);
+        this.isLoading = false;
         throw new Error(`Cannot access file at URI: ${uri}`);
       }
 
@@ -101,16 +110,18 @@ export class TileManager {
         console.log('[TileManager] Successfully copied file to:', localPath);
       } catch (copyError: any) {
         console.error('[TileManager] Error copying file:', copyError);
+        this.isLoading = false;
         throw new Error(`Failed to copy file: ${copyError.message}`);
       }
 
       // Process the file
       await this.processDriftFile(localPath);
+
+      this.isLoading = false;
     } catch (error: any) {
       console.error('[TileManager] Error handling drift URI:', error);
-      // Revert to streaming mode if there's an error
       this.mode = 'streaming';
-      console.log('[TileManager] Reverted to streaming mode due to error');
+      this.isLoading = false;
       throw error;
     }
   }

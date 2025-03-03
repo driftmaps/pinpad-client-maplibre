@@ -6,6 +6,7 @@ import { usePinsState } from './hooks/usePinsState';
 import { useListenForDriftFiles } from './hooks/useListenForDriftFiles';
 import { MapContainer } from './components/MapContainer';
 import { PinManagement } from './components/PinManagement';
+import { LoadingOverlay } from './components/LoadingOverlay';
 
 export default function App() {
   const { tileManager, isLoading, error } = useTileManager();
@@ -235,6 +236,10 @@ export default function App() {
           </View>
         )}
         
+        <LoadingOverlay 
+          visible={isLoading && effectiveStyleUri !== null} 
+          message="Loading map data..." 
+        />
         <PinManagement
           selectedLocation={selectedLocation}
           selectedPin={selectedPin}
