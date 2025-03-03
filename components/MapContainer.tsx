@@ -5,7 +5,7 @@ import { PinMarker } from './PinMarker';
 import { Pin } from '@/types/pin';
 
 interface MapContainerProps {
-  styleUrl: { base: string; version: number } | null;
+  mapStyle: string;
   pins: Pin[];
   onMapPress: (event: any) => void;
   onPinPress: (pin: Pin) => void;
@@ -14,7 +14,7 @@ interface MapContainerProps {
 }
 
 export function MapContainer({
-  styleUrl,
+  mapStyle,
   pins,
   onMapPress,
   onPinPress,
@@ -24,13 +24,7 @@ export function MapContainer({
   const cameraRef = useRef(null);
 
   return (
-    <MapView
-      key={styleUrl?.version}
-      style={styles.map}
-      mapStyle={styleUrl?.base}
-      testID="map-view"
-      onPress={onMapPress}
-    >
+    <MapView style={styles.map} mapStyle={mapStyle} testID="map-view" onPress={onMapPress}>
       <Camera ref={cameraRef} {...cameraProps} />
       {pins.map(pin => (
         <PinMarker key={pin.id} pin={pin} onRemove={onPinRemove} onPress={onPinPress} />
