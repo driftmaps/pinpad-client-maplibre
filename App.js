@@ -3,22 +3,30 @@ import { StyleSheet, View, ActivityIndicator, Text, InteractionManager } from 'r
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTileManager } from './hooks/useTileManager';
 import { usePinsState } from './hooks/usePinsState';
-import { listenForDriftFiles } from './hooks/listenForDriftFiles';
+import { useDriftfileListener } from './hooks/useDriftfileListener';
 import { MapContainer } from './components/MapContainer';
 import { PinManagement } from './components/PinManagement';
 
+let mapStyle = require('./assets/map_style.json');
+
 export default function App() {
   let { tileManager, isLoading, error } = useTileManager();
-
-  const [styleUri, setStyleUri] = useState(null);
-  console.log('[App] Current styleUri:', styleUri);
+  mapStyle.sources = {
+    'custom-tiles': {
+      type: 'vector',
+      tiles: [`${tileManager.getTilesPath()}/{z}/{x}/{y}.pbf`],
+      zoomlevel: 9,
+      maxzoom: 14,
+      minzoom: 5,
+    },
+  };
 
   const [CameraProps, setCameraProps] = useState({
     centerCoordinate: null,
     zoomLevel: 0,
   });
 
-  listenForDriftFiles(tileManager, isLoading, setStyleUri, setCameraProps);
+  useDriftfileListener(tileManager, isLoading, setCameraProps);
 
   const { pins, setPendingPin, clearPendingPin, deletePin, finalizePendingPin, updatePendingPin } =
     usePinsState();
@@ -136,7 +144,7 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         <MapContainer
-          styleUrl={styleUri}
+          mapStyle={mapStyle}
           pins={visiblePins}
           onMapPress={handleMapPress}
           onPinPress={handlePinPress}

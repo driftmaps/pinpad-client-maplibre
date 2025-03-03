@@ -70,7 +70,7 @@
       [
         "expo-asset",
         {
-          "assets": ["./assets/test.drift"]
+          "assets": ["./assets/test.drift", "./assets/map_style.json"]
         }
       ]
     ],

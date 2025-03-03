@@ -4,9 +4,10 @@ import { unzip } from 'react-native-zip-archive';
 
 export class TileManager {
   private initialized = false;
-  private dataPath: string | null = null;
-  private stylePath: string | null = null;
-  private tilesPath: string | null = null;
+  private readonly extractionPath: string | null = FileSystem.documentDirectory;
+  private readonly dataPath: string | null = `${this.extractionPath}map_data`;
+  private readonly mapDataPath: string | null = `${this.dataPath}/map_state.json`;
+  private readonly tilesPath: string | null = `${this.dataPath}/tiles`;
   private centerCoordinate: [number, number] | null = null;
 
   async initialize(): Promise<void> {
@@ -21,8 +22,6 @@ export class TileManager {
     }
   }
 
-  // Handle incoming .drift files from URIs (e.g., from deep links or file
-  // system)
   async handleDriftUri(uri: string): Promise<void> {
     // Skip Expo development client URIs to avoid conflicts
     if (uri.startsWith('exp+pinpad-client-maplibre://')) {
@@ -43,69 +42,28 @@ export class TileManager {
   async processDriftFile(filePath: string): Promise<void> {
     console.log('[TileManager] Processing drift file:', filePath);
     try {
-      const extractionPath = `${FileSystem.documentDirectory}pinpad_tiles`;
-      console.log('[TileManager] Extraction path:', extractionPath);
-
-      // Currently we are forcing a clean up
-      // in real world we would be keeping caches
-      if (await FileSystem.getInfoAsync(extractionPath)) {
-        console.log('[TileManager] Cleaning up existing tiles');
-        await FileSystem.deleteAsync(extractionPath, { idempotent: true });
-      }
-
       console.log('[TileManager] Creating extraction directory');
-      await FileSystem.makeDirectoryAsync(extractionPath, { intermediates: true });
+      await FileSystem.makeDirectoryAsync(this.extractionPath, { intermediates: true });
 
       // Extract the .drift file
       console.log('[TileManager] Starting file extraction...');
       const startTime = Date.now();
-      await unzip(filePath, extractionPath);
+      await unzip(filePath, this.extractionPath);
       const endTime = Date.now();
       console.log(`[TileManager] Extraction completed in ${endTime - startTime}ms`);
 
-      // Set up paths
-      this.dataPath = `${extractionPath}/tiles`;
-      this.tilesPath = `${this.dataPath}/data`;
-      this.stylePath = `${this.dataPath}/style.json`;
-      console.log('[TileManager] Paths configured:', {
-        dataPath: this.dataPath,
-        tilesPath: this.tilesPath,
-        stylePath: this.stylePath,
-      });
-
       // Process the style file
-      if (await FileSystem.getInfoAsync(this.stylePath)) {
-        const styleContent = await FileSystem.readAsStringAsync(this.stylePath);
-        const style = JSON.parse(styleContent);
+      if (await FileSystem.getInfoAsync(this.mapDataPath)) {
+        console.log('[TileManager] Map data found:', this.mapDataPath);
+        const mapData = JSON.parse(await FileSystem.readAsStringAsync(this.mapDataPath));
 
-        // Get center coordinates from metadata or use default
-        if (style.metadata && style.metadata.centerCoordinate) {
-          this.centerCoordinate = style.metadata.centerCoordinate;
+        // Get center coordinates from mapData or use default
+        if (mapData && mapData.centerCoordinate) {
+          this.centerCoordinate = mapData.centerCoordinate;
           console.log('setting centerCoordinate to [lon, lat] = ', this.centerCoordinate);
         }
-
-        // This code adds the tiles to the sources definition
-        // This approach suggests that we are going to limit the view
-        // to the tiles that we have at the point of interaction
-        // This may prove to be annoying for us and we may need
-        // to somehow intercept the request event
-        // but this is fine for now
-        // TODO: determine whether this is acceptable once we start
-        // using non-streaming approach
-        style.sources = {
-          'custom-tiles': {
-            type: 'vector',
-            tiles: [`${this.tilesPath}/{z}/{x}/{y}.pbf`],
-            zoomlevel: 9,
-            maxzoom: 14,
-            minzoom: 5,
-          },
-        };
-
-        // Write back the modified style file
-        await FileSystem.writeAsStringAsync(this.stylePath, JSON.stringify(style, null, 2));
       } else {
-        throw new Error('Style file does not exist');
+        throw new Error('No map data found or no center coordinate in map data');
       }
     } catch (error: any) {
       console.error('TileManager initialization error:', error);
@@ -113,19 +71,7 @@ export class TileManager {
     }
   }
 
-  // Get the URI for the current style file
-  getStyleUri(): string {
-    if (!this.initialized || !this.stylePath) {
-      throw new Error('TileManager not initialized or no stylePath');
-    }
-    return this.stylePath;
-  }
-
-  getTilePath(): string {
-    if (!this.initialized || !this.tilesPath) {
-      throw new Error('TileManager not initialized or no tilesPath');
-    }
-    console.log('[TileManager] Returning tile path:', this.tilesPath);
+  getTilesPath(): string {
     return this.tilesPath;
   }
 

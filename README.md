@@ -68,12 +68,12 @@ can be run on the host machine via `yarn start:tiles`.
 `We have tiles for testing in assets/. A `.drift` file is a zipping of a directory structured like this, with tiles in z/x/y format:
 
 ```
-tiles
-├── data
+map_data
+├── tiles
 │   ├── 10               // z
 │   │   ├── 300          // x
 │   │   │   ├── 364.pbf  // y
-└── style.json
+└── map_state.json
 ```
 
 **To generate these files for testing, run**
