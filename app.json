@@ -8,16 +8,52 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.pinpadclientmaplibre"
+      "bundleIdentifier": "com.anonymous.pinpadclientmaplibre",
+      "infoPlist": {
+        "CFBundleDocumentTypes": [
+          {
+            "CFBundleTypeName": "Drift File",
+            "LSHandlerRank": "Owner",
+            "CFBundleTypeExtensions": [
+              "drift"
+            ],
+            "LSItemContentTypes": [
+              "com.example.drift"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.pinpadclientmaplibre"
+      "package": "com.anonymous.pinpadclientmaplibre",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "mimeType": "*/*",
+              "scheme": "file",
+              "pathPattern": ".*\\.drift"
+            },
+            {
+              "mimeType": "*/*",
+              "scheme": "content",
+              "pathPattern": ".*\\.drift"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -25,6 +61,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "./withCustomInfoPlist",
       "expo-router",
       [
         "expo-splash-screen",

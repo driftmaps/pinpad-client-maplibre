@@ -1,27 +1,6 @@
 PODS:
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
-  - dr-pogodin-react-native-fs (2.30.1):
-    - DoubleConversion
-    - glog
-    - hermes-engine
-    - RCT-Folly (= 2024.01.01.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Yoga
   - EXConstants (17.0.3):
     - ExpoModulesCore
   - Expo (52.0.11):
@@ -1706,7 +1685,6 @@ PODS:
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
-  - "dr-pogodin-react-native-fs (from `../node_modules/@dr.pogodin/react-native-fs`)"
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
@@ -1798,8 +1776,6 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
-  dr-pogodin-react-native-fs:
-    :path: "../node_modules/@dr.pogodin/react-native-fs"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   Expo:
@@ -1961,7 +1937,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
-  dr-pogodin-react-native-fs: 4a8aae59ceae45d96f8f98159cffa3db8acb3ed2
   EXConstants: dd2fe64c6cdb1383b694c309a63028a8e9f2be6d
   Expo: 148aac4ce0da148c63447d09ae41ddb153f35506
   ExpoAsset: 8138f2a9ec55ae1ad7c3871448379f7d97692d15

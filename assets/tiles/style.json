@@ -8,6 +8,9 @@
       "maxzoom": 14
     }
   },
+  "metadata": {
+    "centerCoordinate": [-73.72826520392081, 45.584043985983]
+  },
   "layers": [
     {
       "id": "background",

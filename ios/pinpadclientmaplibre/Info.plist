@@ -8,6 +8,23 @@
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
     <string>pinpad-client-maplibre</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeName</key>
+        <string>Drift File</string>
+        <key>LSHandlerRank</key>
+        <string>Owner</string>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>drift</string>
+        </array>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>com.example.drift</string>
+        </array>
+      </dict>
+    </array>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -29,6 +46,12 @@
         <array>
           <string>myapp</string>
           <string>com.anonymous.pinpadclientmaplibre</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>exp+pinpad-client-maplibre</string>
         </array>
       </dict>
     </array>
@@ -75,5 +98,27 @@
     <string>Automatic</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+      <dict>
+        <key>UTTypeIdentifier</key>
+        <string>com.example.drift</string>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.zip-archive</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>Drift File Format</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>drift</string>
+          </array>
+          <key>public.mime-type</key>
+          <string>application/zip</string>
+        </dict>
+      </dict>
+    </array>
   </dict>
 </plist>
