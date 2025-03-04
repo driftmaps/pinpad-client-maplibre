@@ -4,7 +4,6 @@ import { PinDetailsView } from './PinDetailsView';
 import { PinCreationForm } from './PinCreationForm';
 import { Pin } from '../types/pin';
 
-
 interface Location {
   latitude: number;
   longitude: number;
@@ -25,27 +24,20 @@ export function PinManagement({
   onClose,
   onPinCreate,
   onPinDelete,
-  onUpdatePendingPin
+  onUpdatePendingPin,
 }: PinManagementProps) {
   return (
-    <BottomSheet
-      visible={!!selectedLocation}
-      onClose={onClose}>
-      {
-        selectedPin ? (
-          <PinDetailsView
-            pin={selectedPin}
-            onClose={onClose}
-            onDelete={onPinDelete}
-          />
-        ) : (
-          <PinCreationForm
-            onSubmit={onPinCreate}
-            onMessageChange={(message) => onUpdatePendingPin({ message })}
-            onCancel={onClose}
-            onEmojiSelect={(emoji) => onUpdatePendingPin({ emoji })}
-          />
-        )}
+    <BottomSheet visible={!!selectedLocation} onClose={onClose}>
+      {selectedPin ? (
+        <PinDetailsView pin={selectedPin} onClose={onClose} onDelete={onPinDelete} />
+      ) : (
+        <PinCreationForm
+          onSubmit={onPinCreate}
+          onMessageChange={message => onUpdatePendingPin({ message })}
+          onCancel={onClose}
+          onEmojiSelect={emoji => onUpdatePendingPin({ emoji })}
+        />
+      )}
     </BottomSheet>
   );
-} 
+}

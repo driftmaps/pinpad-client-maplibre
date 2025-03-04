@@ -10,15 +10,7 @@ export function useTileManager() {
     error: null,
   });
 
-  const [tileManager] = useState(() => new TileManager(
-    {
-      bundleFileName: 'test.drift',
-      extractionPath: 'tiles',
-      minZoom: 5,
-      maxZoom: 10,
-    },
-    new FileSystemService()
-  ));
+  const [tileManager] = useState(() => new TileManager());
 
   useEffect(() => {
     const initializeTiles = async () => {

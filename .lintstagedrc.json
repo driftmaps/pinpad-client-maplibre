@@ -1,0 +1,9 @@
+{
+  "*.{js,jsx,ts,tsx,json,css,md}": ["yarn prettier --write"],
+  "android/**/*.kt": [
+    "bash -c \"[ -f .formatters/ktlint ] || (echo 'ktlint not found. Running setup...' && ./scripts/setup-formatters.sh) && .formatters/ktlint --format -F --relative android/**/*.kt\""
+  ],
+  "*.swift": [
+    "bash -c \"[ -f .formatters/swiftformat ] || (echo 'swiftformat not found. Running setup...' && ./scripts/setup-formatters.sh) && .formatters/swiftformat\""
+  ]
+}

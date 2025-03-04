@@ -1,7 +1,7 @@
 const { withInfoPlist } = require('@expo/config-plugins');
 
-const withCustomInfoPlist = (config) => {
-  return withInfoPlist(config, (config) => {
+const withCustomInfoPlist = config => {
+  return withInfoPlist(config, config => {
     // Set your custom UTExportedTypeDeclarations.
     config.modResults.UTExportedTypeDeclarations = [
       {
@@ -10,9 +10,9 @@ const withCustomInfoPlist = (config) => {
         UTTypeDescription: 'Drift File Format',
         UTTypeTagSpecification: {
           'public.filename-extension': ['drift'],
-          'public.mime-type': 'application/zip'
-        }
-      }
+          'public.mime-type': 'application/zip',
+        },
+      },
     ];
     return config;
   });

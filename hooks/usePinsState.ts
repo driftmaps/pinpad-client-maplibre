@@ -20,7 +20,6 @@ const PIN_ACTIONS = {
   UPDATE_PENDING_PIN: 'UPDATE_PENDING_PIN',
 } as const;
 
-
 export function usePinsState() {
   const [state, setState] = useState<PinManagerState>({
     pins: [],
@@ -36,10 +35,12 @@ export function usePinsState() {
       const lastAction = current.actions[current.actions.length - 1];
       const now = Date.now();
       // TODO: determine if this state sync code is necessary, possibly migrate to library
-      if (action.type === PIN_ACTIONS.FINALIZE_PENDING_PIN &&
+      if (
+        action.type === PIN_ACTIONS.FINALIZE_PENDING_PIN &&
         lastAction?.type === PIN_ACTIONS.UPDATE_PENDING_PIN &&
         now - lastUpdateTimestampRef.current < 50 &&
-        !pendingUpdateRef.current) {
+        !pendingUpdateRef.current
+      ) {
         pendingUpdateRef.current = true;
         queueMicrotask(() => {
           pendingUpdateRef.current = false;
@@ -67,7 +68,7 @@ export function usePinsState() {
                   emoji: '📍',
                   message: '',
                   timestamp: action.timestamp,
-                }
+                },
               ],
               actions: [...current.actions, action],
             };
@@ -88,10 +89,7 @@ export function usePinsState() {
             return {
               ...current,
               pendingPin: false,
-              pins: [
-                ...current.pins.filter(pin => pin.id !== 'pending-pin'),
-                newPin
-              ],
+              pins: [...current.pins.filter(pin => pin.id !== 'pending-pin'), newPin],
               actions: [...current.actions, action],
             };
           }
@@ -146,34 +144,43 @@ export function usePinsState() {
     });
   }, []);
 
-  const setPendingPin = useCallback((coordinates: Coordinates) => {
-    dispatchPinAction({
-      type: PIN_ACTIONS.SET_PENDING_PIN,
-      payload: coordinates,
-      timestamp: Date.now(),
-    });
-  }, [dispatchPinAction]);
-
-  const finalizePendingPin = useCallback((pinData: Partial<Pin>) => {
-    dispatchPinAction({
-      type: PIN_ACTIONS.FINALIZE_PENDING_PIN,
-      payload: {
-        id: generateId(),
-        ...pinData,
-        message: pinData.message || '',
+  const setPendingPin = useCallback(
+    (coordinates: Coordinates) => {
+      dispatchPinAction({
+        type: PIN_ACTIONS.SET_PENDING_PIN,
+        payload: coordinates,
         timestamp: Date.now(),
-      },
-      timestamp: Date.now(),
-    });
-  }, [dispatchPinAction]);
+      });
+    },
+    [dispatchPinAction]
+  );
 
-  const deletePin = useCallback((id: string) => {
-    dispatchPinAction({
-      type: PIN_ACTIONS.DELETE_PIN,
-      payload: id,
-      timestamp: Date.now(),
-    });
-  }, [dispatchPinAction]);
+  const finalizePendingPin = useCallback(
+    (pinData: Partial<Pin>) => {
+      dispatchPinAction({
+        type: PIN_ACTIONS.FINALIZE_PENDING_PIN,
+        payload: {
+          id: generateId(),
+          ...pinData,
+          message: pinData.message || '',
+          timestamp: Date.now(),
+        },
+        timestamp: Date.now(),
+      });
+    },
+    [dispatchPinAction]
+  );
+
+  const deletePin = useCallback(
+    (id: string) => {
+      dispatchPinAction({
+        type: PIN_ACTIONS.DELETE_PIN,
+        payload: id,
+        timestamp: Date.now(),
+      });
+    },
+    [dispatchPinAction]
+  );
 
   const clearPendingPin = useCallback(() => {
     dispatchPinAction({
@@ -183,13 +190,16 @@ export function usePinsState() {
     });
   }, [dispatchPinAction]);
 
-  const updatePendingPin = useCallback((updates: Partial<Pin>) => {
-    dispatchPinAction({
-      type: PIN_ACTIONS.UPDATE_PENDING_PIN,
-      payload: updates,
-      timestamp: Date.now(),
-    });
-  }, [dispatchPinAction]);
+  const updatePendingPin = useCallback(
+    (updates: Partial<Pin>) => {
+      dispatchPinAction({
+        type: PIN_ACTIONS.UPDATE_PENDING_PIN,
+        payload: updates,
+        timestamp: Date.now(),
+      });
+    },
+    [dispatchPinAction]
+  );
 
   const exportData = useCallback(() => {
     return {
@@ -200,15 +210,10 @@ export function usePinsState() {
   }, [state]);
 
   const isValidPin = (pin: Pin | null | undefined): pin is Pin => {
-    return pin != null &&
-      typeof pin.id === 'string' &&
-      pin.coordinates != null;
+    return pin != null && typeof pin.id === 'string' && pin.coordinates != null;
   };
 
-  const pins = useMemo(() =>
-    state.pins.filter(isValidPin),
-    [state.pins, state.pendingPin]
-  );
+  const pins = useMemo(() => state.pins.filter(isValidPin), [state.pins, state.pendingPin]);
 
   return {
     pins,

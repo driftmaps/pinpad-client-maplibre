@@ -39,3 +39,6 @@ app-example
 
 # Assets
 assets/test.drift
+
+# Formatters
+.formatters/

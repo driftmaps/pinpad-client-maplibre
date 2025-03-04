@@ -11,7 +11,7 @@ export class FileSystemService {
 
     const destinationInfo = await FileSystem.getInfoAsync(zipDestination);
     const extractionInfo = await FileSystem.getInfoAsync(extractionPath);
-    
+
     if (destinationInfo.exists) {
       await FileSystem.deleteAsync(zipDestination, { idempotent: true });
     }
@@ -24,7 +24,7 @@ export class FileSystemService {
     if (asset && asset[0]) {
       await FileSystem.copyAsync({
         from: asset[0].localUri!,
-        to: zipDestination
+        to: zipDestination,
       });
     } else {
       throw new Error(`Failed to load asset: ${bundleName}`);
