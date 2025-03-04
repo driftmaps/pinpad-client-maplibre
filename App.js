@@ -28,8 +28,8 @@ export default function App() {
 
   useDriftfileListener(tileManager, isLoading, setCameraProps);
 
-  const { pins, setPendingPin, clearPendingPin, deletePin, finalizePendingPin, updatePendingPin } =
-    usePinsState();
+  let { pins, setPendingPin, clearPendingPin, deletePin, finalizePendingPin, updatePendingPin } =
+    usePinsState(tileManager.getPins());
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedPin, setSelectedPin] = useState(null);
 
@@ -129,6 +129,7 @@ export default function App() {
     [finalizePendingPin, selectedLocation, clearPendingPin]
   );
 
+  pins = tileManager.getPins();
   const visiblePins = useMemo(() => pins.filter(pin => pin && pin.coordinates), [pins]);
 
   if (isLoading) return <ActivityIndicator />;
