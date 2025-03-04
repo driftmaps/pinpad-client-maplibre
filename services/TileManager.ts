@@ -1,6 +1,7 @@
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import { unzip } from 'react-native-zip-archive';
+import { Pin } from '../types/pin';
 
 export class TileManager {
   private initialized = false;
@@ -9,6 +10,7 @@ export class TileManager {
   private readonly mapDataPath: string | null = `${this.dataPath}/map_state.json`;
   private readonly tilesPath: string | null = `${this.dataPath}/tiles`;
   private centerCoordinate: [number, number] | null = null;
+  private pins: Pin[] = [];
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
@@ -62,6 +64,12 @@ export class TileManager {
           this.centerCoordinate = mapData.centerCoordinate;
           console.log('setting centerCoordinate to [lon, lat] = ', this.centerCoordinate);
         }
+
+        // Get pins from mapData
+        if (mapData && Array.isArray(mapData.pins)) {
+          this.pins = mapData.pins;
+          console.log('Loaded pins from map state:', this.pins.length);
+        }
       } else {
         throw new Error('No map data found or no center coordinate in map data');
       }
@@ -80,5 +88,9 @@ export class TileManager {
       throw new Error('TileManager not initialized or center coordinate not set');
     }
     return this.centerCoordinate;
+  }
+
+  public getPins(): Pin[] {
+    return this.pins;
   }
 }

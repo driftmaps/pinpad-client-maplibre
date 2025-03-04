@@ -20,11 +20,15 @@ const PIN_ACTIONS = {
   UPDATE_PENDING_PIN: 'UPDATE_PENDING_PIN',
 } as const;
 
-export function usePinsState() {
-  const [state, setState] = useState<PinManagerState>({
-    pins: [],
-    actions: [],
-    pendingPin: false,
+export function usePinsState(_initialPins: Pin[]) {
+  const [state, setState] = useState<PinManagerState>(() => {
+    // Initialize with pins from mapStateJson if available
+    const initialPins = _initialPins;
+    return {
+      pins: initialPins,
+      actions: [],
+      pendingPin: false,
+    };
   });
 
   const pendingUpdateRef = useRef(false);
